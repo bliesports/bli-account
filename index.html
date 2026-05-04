@@ -14,6 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="logo1616 (1).png">
 
     <style>
@@ -51,6 +52,7 @@
             cursor: pointer;
         }
 
+        /* Kullanıcı menüsü */
         .user-menu {
             position: relative;
             cursor: pointer;
@@ -93,6 +95,7 @@
             color: #666;
         }
 
+        /* Dropdown menü */
         .user-dropdown {
             position: absolute;
             top: 55px;
@@ -164,6 +167,7 @@
             color: #ff3b30;
         }
 
+        /* Butonlar */
         .auth-buttons {
             display: flex;
             gap: 12px;
@@ -194,12 +198,14 @@
             transition: 0.2s;
         }
 
+        /* Ana içerik */
         .main-container {
             max-width: 1280px;
             margin: 100px auto 60px;
             padding: 0 5%;
         }
 
+        /* Hoşgeldin kartı */
         .welcome-card {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             border-radius: 32px;
@@ -217,6 +223,7 @@
             opacity: 0.8;
         }
 
+        /* Sipariş kartları */
         .orders-list {
             display: flex;
             flex-direction: column;
@@ -241,6 +248,7 @@
         .order-id {
             font-weight: 700;
             font-family: monospace;
+            font-size: 0.9rem;
         }
 
         .order-status {
@@ -250,10 +258,27 @@
             font-weight: 600;
         }
 
-        .status-delivered { background: #e8f5e9; color: #2e7d32; }
-        .status-shipped { background: #fff3e0; color: #ed6c02; }
-        .status-pending { background: #ffebee; color: #c62828; }
+        .status-delivered {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
 
+        .status-shipped {
+            background: #fff3e0;
+            color: #ed6c02;
+        }
+
+        .status-pending {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .status-cancelled {
+            background: #fafafa;
+            color: #757575;
+        }
+
+        /* Cüzdan kartı */
         .wallet-card {
             background: white;
             border-radius: 28px;
@@ -284,6 +309,7 @@
             cursor: pointer;
         }
 
+        /* Beğendiklerim */
         .liked-item {
             display: flex;
             justify-content: space-between;
@@ -294,6 +320,7 @@
             margin-bottom: 12px;
         }
 
+        /* Modal */
         .modal {
             position: fixed;
             inset: 0;
@@ -305,7 +332,9 @@
             z-index: 2000;
         }
 
-        .modal.active { display: flex; }
+        .modal.active {
+            display: flex;
+        }
 
         .modal-content {
             background: white;
@@ -337,8 +366,14 @@
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         footer {
@@ -349,26 +384,49 @@
             color: #888;
             font-size: 0.8rem;
         }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .order-product-list {
+            margin: 12px 0;
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .order-total {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #1a1a2e;
+        }
     </style>
 </head>
 <body>
 
 <nav class="navbar">
     <div class="logo" onclick="location.href='/'">
-        <!-- Resim yolunu kendi logonla güncelleyebilirsin -->
         <img src="ChatGPT Image 4 May 2026 17_50_07.png" alt="BLI">
     </div>
     
-    <div id="navRightArea"></div>
+    <div id="navRightArea">
+        <!-- Dinamik içerik -->
+    </div>
 </nav>
 
-<div class="main-container" id="mainContainer"></div>
+<div class="main-container" id="mainContainer">
+    <!-- Dinamik içerik -->
+</div>
 
 <footer>
     <p>© 2026 BLI ESPORTS — Tüm hakları saklıdır.</p>
 </footer>
 
-<!-- Auth Modal -->
+<!-- Modal (Giriş/Kayıt için) -->
 <div class="modal" id="authModal">
     <div class="modal-content">
         <div id="loginFormContent">
@@ -409,6 +467,7 @@
     let currentUser = null;
     let currentSection = 'dashboard';
 
+    // Toast mesajı
     function showToast(msg) {
         const toast = document.createElement('div');
         toast.className = 'toast';
@@ -417,9 +476,13 @@
         setTimeout(() => toast.remove(), 2500);
     }
 
-    function openAuthModal() { document.getElementById('authModal').classList.add('active'); }
-    function closeAuthModal() { document.getElementById('authModal').classList.remove('active'); }
-    
+    // Modal kontrol
+    function openAuthModal() {
+        document.getElementById('authModal').classList.add('active');
+    }
+    function closeAuthModal() {
+        document.getElementById('authModal').classList.remove('active');
+    }
     window.switchToRegister = function() {
         document.getElementById('loginFormContent').style.display = 'none';
         document.getElementById('registerFormContent').style.display = 'block';
@@ -429,6 +492,7 @@
         document.getElementById('registerFormContent').style.display = 'none';
     };
 
+    // Giriş/Kayıt işlemleri
     async function handleLogin() {
         const email = document.getElementById('loginEmail').value;
         const pass = document.getElementById('loginPassword').value;
@@ -436,14 +500,19 @@
             await auth.signInWithEmailAndPassword(email, pass);
             showToast("Giriş başarılı!");
             closeAuthModal();
-        } catch(e) { showToast("Hata: " + e.message); }
+        } catch(e) {
+            showToast("Hata: " + e.message);
+        }
     }
 
     async function handleRegister() {
         const name = document.getElementById('regName').value;
         const email = document.getElementById('regEmail').value;
         const pass = document.getElementById('regPassword').value;
-        if(!name || !email || !pass) { showToast("Tüm alanları doldur!"); return; }
+        if(!name || !email || !pass) {
+            showToast("Tüm alanları doldur!");
+            return;
+        }
         try {
             const cred = await auth.createUserWithEmailAndPassword(email, pass);
             await cred.user.updateProfile({ displayName: name });
@@ -451,29 +520,98 @@
                 name: name,
                 email: email,
                 balance: 0,
+                wishlist: [],
+                coupons: [],
                 createdAt: new Date()
             });
             showToast("Kayıt başarılı! Hoşgeldin.");
             closeAuthModal();
-        } catch(e) { showToast("Hata: " + e.message); }
+        } catch(e) {
+            showToast("Hata: " + e.message);
+        }
     }
 
+    // Çıkış
     async function logout() {
         await auth.signOut();
         showToast("Çıkış yapıldı.");
+        currentSection = 'dashboard';
+        renderMainContent();
     }
 
-    // Demo siparişler (Statik - /my-orders sayfan dinamik olacak)
+    // ---------- SİPARİŞLER (Firestore'dan Shopier webhook ile gelen verileri çek) ----------
     async function getOrders() {
-        return [
-            { id: "BLI-2401", date: "15 Mart 2026", total: 1899, status: "delivered", items: "BLI V1 PRO Mouse" }
-        ];
+        if(!currentUser) return [];
+        try {
+            // Kullanıcının siparişlerini Firestore'dan çek
+            const snapshot = await db.collection('orders')
+                .where('userId', '==', currentUser.uid)
+                .orderBy('orderDate', 'desc')
+                .get();
+            
+            const orders = [];
+            snapshot.forEach(doc => {
+                const orderData = doc.data();
+                orders.push({
+                    id: doc.id,
+                    orderId: orderData.orderId || doc.id,
+                    orderNumber: orderData.orderNumber,
+                    status: orderData.status || 'pending',
+                    totalAmount: orderData.totalAmount || 0,
+                    orderDate: orderData.orderDate,
+                    products: orderData.products || [],
+                    paymentMethod: orderData.paymentMethod,
+                    shippingAddress: orderData.shippingAddress,
+                    shopierOrderId: orderData.shopierOrderId
+                });
+            });
+            return orders;
+        } catch(error) {
+            console.error("Siparişler çekilirken hata:", error);
+            showToast("Siparişler yüklenirken bir hata oluştu.");
+            return [];
+        }
     }
 
+    // ---------- WEBHOOK ENTEGRASYONU (Shopier'dan gelen verileri kaydet) ----------
+    // Bu fonksiyon, Firebase Cloud Function veya backend'inizde çalışacak
+    // Örnek yapı:
+    async function saveOrderFromShopier(shopierData) {
+        // shopierData: Shopier'dan gelen webhook verileri
+        const orderData = {
+            userId: shopierData.customer_email, // E-posta ile eşleştirme yapılabilir
+            orderId: shopierData.order_id,
+            orderNumber: shopierData.order_number,
+            status: 'pending', // Başlangıç durumu
+            totalAmount: shopierData.total_amount,
+            orderDate: new Date(shopierData.order_date),
+            products: shopierData.products,
+            paymentMethod: shopierData.payment_method,
+            shippingAddress: shopierData.shipping_address,
+            shopierOrderId: shopierData.id,
+            createdAt: new Date()
+        };
+        
+        // Kullanıcıyı e-posta ile bul
+        const userQuery = await db.collection('users')
+            .where('email', '==', shopierData.customer_email)
+            .get();
+        
+        if(!userQuery.empty) {
+            orderData.userId = userQuery.docs[0].id;
+            await db.collection('orders').add(orderData);
+            showToast("Yeni sipariş eklendi!");
+        } else {
+            console.warn("Kullanıcı bulunamadı:", shopierData.customer_email);
+        }
+    }
+
+    // ---------- CÜZDAN (Firestore) ----------
     async function getBalance() {
         if(!currentUser) return 0;
         const doc = await db.collection('users').doc(currentUser.uid).get();
-        return doc.exists ? (doc.data().balance || 0) : 0;
+        if(doc.exists) return doc.data().balance || 0;
+        return 0;
     }
 
     async function addBalance(amount) {
@@ -486,17 +624,30 @@
 
     async function withdrawBalance(amount) {
         const current = await getBalance();
-        if(current < amount) { showToast("Yetersiz bakiye!"); return; }
+        if(current < amount) {
+            showToast("Yetersiz bakiye!");
+            return;
+        }
         const newBalance = current - amount;
         await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
         showToast(`${amount} TL çekildi.`);
         renderMainContent();
     }
 
+    // ---------- BEĞENDİKLERİM (Wishlist) ----------
     async function getWishlist() {
         if(!currentUser) return [];
         const doc = await db.collection('users').doc(currentUser.uid).get();
-        return doc.exists ? (doc.data().wishlist || []) : [];
+        if(doc.exists) return doc.data().wishlist || [];
+        return [];
+    }
+
+    async function addToWishlist(product) {
+        const wishlist = await getWishlist();
+        wishlist.push(product);
+        await db.collection('users').doc(currentUser.uid).update({ wishlist: wishlist });
+        showToast("Ürün beğenilere eklendi!");
+        renderMainContent();
     }
 
     async function removeFromWishlist(index) {
@@ -507,22 +658,15 @@
         renderMainContent();
     }
 
+    // ---------- KUPONLARIM ----------
     async function getCoupons() {
+        if(!currentUser) return [];
         const doc = await db.collection('users').doc(currentUser.uid).get();
-        return doc.exists ? (doc.data().coupons || []) : [];
+        if(doc.exists) return doc.data().coupons || [];
+        return [];
     }
 
-    // BÖLÜM DEĞİŞTİRME (Siparişlerim için Yönlendirme Eklendi)
-    function changeSection(section) {
-        if(section === 'orders') {
-            window.location.href = '/my-orders/'; // Seni doğrudan alt klasöre atar
-            return;
-        }
-        currentSection = section;
-        renderMainContent();
-        document.querySelector('.user-menu')?.classList.remove('active');
-    }
-
+    // ---------- ANA İÇERİK RENDER ----------
     async function renderMainContent() {
         const container = document.getElementById('mainContainer');
         if(!currentUser) {
@@ -543,101 +687,269 @@
         const wishlist = await getWishlist();
         const coupons = await getCoupons();
 
-        // Burası sayfa içi sipariş görünümü (Normalde /my-orders'a yönleneceği için burası yedek kalır)
+        // Siparişler HTML
         let ordersHtml = '<div class="orders-list">';
-        orders.forEach(order => {
-            let statusClass = order.status === 'delivered' ? 'status-delivered' : (order.status === 'shipped' ? 'status-shipped' : 'status-pending');
-            ordersHtml += `
-                <div class="order-card">
-                    <div class="order-header">
-                        <span class="order-id">${order.id}</span>
-                        <span class="order-status ${statusClass}">${order.status}</span>
+        if(orders.length === 0) {
+            ordersHtml += '<div style="text-align:center; padding:40px; background:white; border-radius:20px;"><i class="fa-regular fa-receipt" style="font-size:2rem; color:#ccc; margin-bottom:12px; display:block;"></i><p>Henüz siparişin bulunmuyor.</p><p style="font-size:0.8rem; color:#888; margin-top:8px;">Sipariş verdiğinde burada görünecek.</p></div>';
+        } else {
+            orders.forEach(order => {
+                let statusClass = 'status-pending';
+                let statusText = 'Hazırlanıyor';
+                
+                if(order.status === 'delivered') {
+                    statusClass = 'status-delivered';
+                    statusText = 'Teslim Edildi';
+                } else if(order.status === 'shipped') {
+                    statusClass = 'status-shipped';
+                    statusText = 'Kargoda';
+                } else if(order.status === 'cancelled') {
+                    statusClass = 'status-cancelled';
+                    statusText = 'İptal Edildi';
+                }
+                
+                const productList = order.products && order.products.length > 0 
+                    ? order.products.map(p => `<div>• ${p.name} x ${p.quantity} = ${p.price} TL</div>`).join('')
+                    : '<div>Ürün detayları bulunmuyor</div>';
+                
+                ordersHtml += `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <span class="order-id">Sipariş No: ${order.orderNumber || order.orderId}</span>
+                            <span class="order-status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="order-product-list">
+                            ${productList}
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top:12px;">
+                            <span style="color:#888;">${order.orderDate ? new Date(order.orderDate.toDate()).toLocaleDateString('tr-TR') : 'Tarih bilgisi yok'}</span>
+                            <span class="order-total">${order.totalAmount} TL</span>
+                        </div>
+                        ${order.paymentMethod ? `<div style="margin-top:8px; font-size:0.75rem; color:#888;">Ödeme: ${order.paymentMethod}</div>` : ''}
                     </div>
-                    <div>${order.items}</div>
-                </div>
-            `;
-        });
+                `;
+            });
+        }
         ordersHtml += '</div>';
 
+        // Beğendiklerim HTML
         let wishlistHtml = '<div>';
-        wishlist.forEach((item, idx) => {
-            wishlistHtml += `<div class="liked-item"><div><strong>${item.name}</strong></div><button onclick="removeFromWishlist(${idx})"><i class="fa-trash-can"></i></button></div>`;
-        });
+        if(wishlist.length === 0) {
+            wishlistHtml += '<p style="text-align:center; padding:40px; background:white; border-radius:20px;">Beğendiğin ürün yok.</p>';
+        } else {
+            wishlist.forEach((item, idx) => {
+                wishlistHtml += `
+                    <div class="liked-item">
+                        <div><strong>${item.name}</strong><br><span style="font-size:0.8rem;">${item.price} TL</span></div>
+                        <button onclick="removeFromWishlist(${idx})" style="background:none; border:none; color:#ff3b30; cursor:pointer;"><i class="fa-regular fa-trash-can"></i></button>
+                    </div>
+                `;
+            });
+        }
         wishlistHtml += '</div>';
+
+        // Kuponlar HTML
+        let couponsHtml = '<div>';
+        if(coupons.length === 0) {
+            couponsHtml += '<p style="text-align:center; padding:40px; background:white; border-radius:20px;">Aktif kuponun yok.</p>';
+        } else {
+            coupons.forEach(coupon => {
+                couponsHtml += `
+                    <div class="order-card">
+                        <strong>${coupon.code}</strong> - ${coupon.discount} TL indirim
+                        <div style="font-size:0.7rem; color:#888;">Son kullanım: ${coupon.expiry}</div>
+                    </div>
+                `;
+            });
+        }
+        couponsHtml += '</div>';
 
         container.innerHTML = `
             <div class="welcome-card">
-                <h1>Merhaba, ${currentUser.displayName?.split(' ')[0] || 'Kullanıcı'} 👋</h1>
-                <p>Hesabını buradan yönetebilirsin.</p>
+                <h1>Merhaba, ${currentUser.displayName?.split(' ')[0] || 'BLI Kullanıcısı'} 👋</h1>
+                <p>Hesabını yönet, siparişlerini takip et ve avantajları keşfet.</p>
             </div>
 
-            <div style="display: ${currentSection === 'dashboard' ? 'block' : 'none'}">
+            <div id="dashboardSection" class="section ${currentSection === 'dashboard' ? 'active' : ''}">
                 <div class="wallet-card">
-                    <h3>Cüzdanım</h3>
-                    <div class="wallet-amount">${balance} TL</div>
-                    <button class="btn-wallet" onclick="showAddBalanceModal()">Bakiye Yükle</button>
+                    <h3><i class="fa-regular fa-credit-card"></i> Cüzdanım</h3>
+                    <div class="wallet-amount">${balance.toFixed(2)} TL</div>
+                    <div class="balance-actions">
+                        <button class="btn-wallet" onclick="showAddBalanceModal()">Bakiye Yükle</button>
+                        <button class="btn-wallet" onclick="showWithdrawModal()">Bakiye Çek</button>
+                    </div>
                 </div>
             </div>
 
-            <div style="display: ${currentSection === 'wishlist' ? 'block' : 'none'}">
-                <h2>Beğendiklerim</h2>
+            <div id="ordersSection" class="section ${currentSection === 'orders' ? 'active' : ''}">
+                <h2 style="margin-bottom: 24px;"><i class="fa-regular fa-clipboard"></i> Siparişlerim</h2>
+                ${ordersHtml}
+            </div>
+
+            <div id="wishlistSection" class="section ${currentSection === 'wishlist' ? 'active' : ''}">
+                <h2 style="margin-bottom: 24px;">❤️ Beğendiklerim</h2>
                 ${wishlistHtml}
             </div>
 
-            <div style="display: ${currentSection === 'wallet' ? 'block' : 'none'}">
-                <div class="wallet-card"><h3>Mali Geçmiş</h3><p>Bakiye: ${balance} TL</p></div>
+            <div id="couponsSection" class="section ${currentSection === 'coupons' ? 'active' : ''}">
+                <h2 style="margin-bottom: 24px;">🎫 Kuponlarım</h2>
+                ${couponsHtml}
+            </div>
+
+            <div id="walletSection" class="section ${currentSection === 'wallet' ? 'active' : ''}">
+                <div class="wallet-card">
+                    <h3>💰 Cüzdan Detayı</h3>
+                    <p style="margin-top:16px;">Güncel bakiye: <strong>${balance.toFixed(2)} TL</strong></p>
+                    <button class="btn-wallet" style="margin-top:16px;" onclick="showAddBalanceModal()">Bakiye Yükle</button>
+                    <button class="btn-wallet" style="margin-top:16px; margin-left:12px;" onclick="showWithdrawModal()">Bakiye Çek</button>
+                </div>
             </div>
         `;
     }
 
+    // Bakiye yükleme/çekme modal
     function showAddBalanceModal() {
-        const amount = prompt("Yüklenecek tutar:");
-        if(amount > 0) addBalance(Number(amount));
+        const amount = prompt("Yüklenecek tutar (TL):");
+        if(amount && !isNaN(amount) && Number(amount) > 0) {
+            addBalance(Number(amount));
+        } else {
+            showToast("Geçerli bir tutar girin");
+        }
+    }
+    
+    function showWithdrawModal() {
+        const amount = prompt("Çekilecek tutar (TL):");
+        if(amount && !isNaN(amount) && Number(amount) > 0) {
+            withdrawBalance(Number(amount));
+        } else {
+            showToast("Geçerli bir tutar girin");
+        }
     }
 
+    // Dropdown menüden bölüm değiştirme
+    function changeSection(section) {
+        currentSection = section;
+        renderMainContent();
+        document.querySelector('.user-menu')?.classList.remove('active');
+    }
+
+    // Navbar sağ taraf render
     function renderNavbar() {
         const navRight = document.getElementById('navRightArea');
         if(currentUser) {
-            const name = currentUser.displayName || "Kullanıcı";
+            const name = currentUser.displayName || currentUser.email?.split('@')[0] || 'Kullanıcı';
+            const initial = name.charAt(0).toUpperCase();
             navRight.innerHTML = `
                 <div class="user-menu" id="userMenu">
                     <div class="user-trigger" onclick="toggleUserMenu()">
-                        <div class="user-avatar">${name[0].toUpperCase()}</div>
+                        <div class="user-avatar">${initial}</div>
                         <span class="user-name">${name}</span>
-                        <i class="fa-solid fa-chevron-down"></i>
+                        <i class="fa-solid fa-chevron-down user-chevron"></i>
                     </div>
                     <div class="user-dropdown">
-                        <div class="dropdown-header"><h4>${name}</h4><p>${currentUser.email}</p></div>
+                        <div class="dropdown-header">
+                            <h4>${name}</h4>
+                            <p>${currentUser.email}</p>
+                        </div>
                         <div class="dropdown-items">
-                            <div class="dropdown-item" onclick="changeSection('dashboard')">Hesabım</div>
-                            <div class="dropdown-item" onclick="changeSection('orders')">Siparişlerim</div>
-                            <div class="dropdown-item" onclick="changeSection('wishlist')">Beğendiklerim</div>
-                            <div class="dropdown-item" onclick="changeSection('wallet')">Cüzdanım</div>
+                            <div class="dropdown-item" onclick="changeSection('dashboard')">
+                                <i class="fa-regular fa-user"></i> Hesabım
+                            </div>
+                            <div class="dropdown-item" onclick="changeSection('orders')">
+                                <i class="fa-regular fa-clipboard"></i> Siparişlerim
+                            </div>
+                            <div class="dropdown-item" onclick="changeSection('wishlist')">
+                                <i class="fa-regular fa-heart"></i> Beğendiklerim
+                            </div>
+                            <div class="dropdown-item" onclick="changeSection('coupons')">
+                                <i class="fa-regular fa-ticket"></i> Kuponlarım
+                            </div>
+                            <div class="dropdown-item" onclick="changeSection('wallet')">
+                                <i class="fa-regular fa-wallet"></i> Cüzdanım
+                            </div>
                             <div class="dropdown-divider"></div>
-                            <div class="dropdown-item logout-item" onclick="logout()">Çıkış Yap</div>
+                            <div class="dropdown-item logout-item" onclick="logout()">
+                                <i class="fa-solid fa-arrow-right-from-bracket"></i> Çıkış Yap
+                            </div>
                         </div>
                     </div>
                 </div>
             `;
         } else {
-            navRight.innerHTML = `<button class="btn-login" onclick="openAuthModal()">Giriş Yap</button>`;
+            navRight.innerHTML = `
+                <div class="auth-buttons">
+                    <button class="btn-login" onclick="openAuthModal()">Giriş Yap</button>
+                    <button class="btn-register" onclick="openAuthModal()">Kaydol</button>
+                </div>
+            `;
         }
     }
 
-    function toggleUserMenu() { document.getElementById('userMenu')?.classList.toggle('active'); }
+    function toggleUserMenu() {
+        const menu = document.getElementById('userMenu');
+        if(menu) menu.classList.toggle('active');
+    }
 
-    auth.onAuthStateChanged((user) => {
-        currentUser = user;
-        renderNavbar();
-        renderMainContent();
+    // Sayfaya tıklayınca dropdown kapanması
+    document.addEventListener('click', function(e) {
+        const userMenu = document.getElementById('userMenu');
+        if(userMenu && !userMenu.contains(e.target)) {
+            userMenu.classList.remove('active');
+        }
     });
 
+    // Auth state değiştiğinde
+    auth.onAuthStateChanged(async (user) => {
+        currentUser = user;
+        renderNavbar();
+        await renderMainContent();
+    });
+
+    // Global fonksiyonlar
     window.handleLogin = handleLogin;
     window.handleRegister = handleRegister;
     window.logout = logout;
+    window.openAuthModal = openAuthModal;
     window.toggleUserMenu = toggleUserMenu;
     window.changeSection = changeSection;
+    window.showAddBalanceModal = showAddBalanceModal;
+    window.showWithdrawModal = showWithdrawModal;
     window.removeFromWishlist = removeFromWishlist;
+    window.addBalance = addBalance;
+    window.withdrawBalance = withdrawBalance;
 </script>
+
+<!-- Shopier Webhook Entegrasyon Notu -->
+<!-- 
+    🔔 SHOPIER WEBHOOR KURULUMU:
+    
+    1. Shopier panelinde "API Ayarları" bölümüne gidin
+    2. Webhook URL olarak şu adresi tanımlayın:
+       https://yourdomain.com/api/shopier-webhook
+    3. Bu endpoint'e gelen verileri işlemek için bir Firebase Cloud Function veya backend servisi oluşturun
+    4. Örnek Cloud Function kodu:
+    
+    exports.shopierWebhook = functions.https.onRequest(async (req, res) => {
+        if(req.method !== 'POST') return res.status(405).send('Method Not Allowed');
+        
+        const shopierData = req.body;
+        
+        // Sipariş verilerini Firestore'a kaydet
+        await admin.firestore().collection('orders').add({
+            userId: shopierData.customer_email,
+            orderId: shopierData.order_id,
+            orderNumber: shopierData.order_number,
+            totalAmount: shopierData.total_amount,
+            orderDate: admin.firestore.Timestamp.now(),
+            products: shopierData.products,
+            status: 'pending',
+            paymentMethod: shopierData.payment_method,
+            shopierOrderId: shopierData.id
+        });
+        
+        res.status(200).send('OK');
+    });
+    
+    5. Test için https://webhook.site/ adresini kullanabilirsiniz
+-->
 </body>
 </html>
