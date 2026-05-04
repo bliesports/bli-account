@@ -149,31 +149,16 @@
     </div>
 </div>
 
-<script>
-    // NOT: Shopier API'yi doğrudan JavaScript'ten çağırmak güvenli değildir.
-    // Bu veri, senin backend'inden (PHP/NodeJS) gelen veriymiş gibi kurgulandı.
-    
-    const API_ENDPOINT = "/api/get-orders.php"; // Senin veriyi çekeceğin adres
-    const shopierApiKey = "BURAYA_ANAHTARINI_GİRME_SERVER_TARAFI_KULLAN"; 
+<!-- ... yukarıdaki CSS kısımları aynı kalıyor ... -->
 
-    // Örnek Veri (Shopier'dan gelmiş gibi)
-    const mockOrders = [
-        /* {
-            id: "206687245331",
-            productName: "BLI V1 PRO Mouse",
-            date: "04.05.2026",
-            price: "299,99 TL",
-            status: "Hazırlanıyor",
-            img: "mouse.png",
-            trackingUrl: "https://www.shopier.com/takip"
-        } */
-    ];
+<script>
+    const API_ENDPOINT = "/api/get-orders.php"; 
 
     function renderOrders(orders) {
         const list = document.getElementById('order-list');
         const empty = document.getElementById('empty-state');
 
-        if (orders.length === 0) {
+        if (!orders || orders.length === 0) {
             list.style.display = 'none';
             empty.style.display = 'block';
             return;
@@ -194,12 +179,21 @@
         `).join('');
     }
 
-    // Sayfa açıldığında verileri yükle
-    document.addEventListener('DOMContentLoaded', () => {
-        // Şimdilik mock veriyi basıyoruz, gerçek API hazır olduğunda oradan çekeceğiz.
-        renderOrders(mockOrders);
-    });
-</script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const list = document.getElementById('order-list');
+        const empty = document.getElementById('empty-state');
+
+        try {
+            const response = await fetch(API_ENDPOINT);
+            const orders = await response.json();
+            renderOrders(orders);
+        } catch (error) {
+            console.error("Siparişler çekilirken hata oluştu:", error);
+            list.style.display = 'none';
+            empty.style.display = 'block';
+        }
+    }); // Kapanış parantezi buraya eklendi
+</script> <!-- Script etiketi kapatıldı -->
 
 </body>
 </html>
