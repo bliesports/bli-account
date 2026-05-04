@@ -917,39 +917,5 @@
     window.addBalance = addBalance;
     window.withdrawBalance = withdrawBalance;
 </script>
-
-<!-- Shopier Webhook Entegrasyon Notu -->
-<!-- 
-    🔔 SHOPIER WEBHOOR KURULUMU:
-    
-    1. Shopier panelinde "API Ayarları" bölümüne gidin
-    2. Webhook URL olarak şu adresi tanımlayın:
-       https://yourdomain.com/api/shopier-webhook
-    3. Bu endpoint'e gelen verileri işlemek için bir Firebase Cloud Function veya backend servisi oluşturun
-    4. Örnek Cloud Function kodu:
-    
-    exports.shopierWebhook = functions.https.onRequest(async (req, res) => {
-        if(req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-        
-        const shopierData = req.body;
-        
-        // Sipariş verilerini Firestore'a kaydet
-        await admin.firestore().collection('orders').add({
-            userId: shopierData.customer_email,
-            orderId: shopierData.order_id,
-            orderNumber: shopierData.order_number,
-            totalAmount: shopierData.total_amount,
-            orderDate: admin.firestore.Timestamp.now(),
-            products: shopierData.products,
-            status: 'pending',
-            paymentMethod: shopierData.payment_method,
-            shopierOrderId: shopierData.id
-        });
-        
-        res.status(200).send('OK');
-    });
-    
-    5. Test için https://webhook.site/ adresini kullanabilirsiniz
--->
 </body>
 </html>
