@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siparişlerim | BLI Esports Account</title>
+    <link rel="icon" type="image/png" href="https://astrangeman.bliesports.com.tr/WhatsApp_Image_2026-05-02_at_20.50.04__1_-removebg-preview.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #f4f7f5;
+            --white: #ffffff;
+            --primary: #2ecc2e;
+            --dark-green: #0a2b18;
+            --text-dark: #1a1a1a;
+            --text-gray: #666;
+            --pink-accent: #ff00ff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-dark); }
+
+        /* HEADER */
+        .navbar {
+            background: var(--dark-green);
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo { font-family: 'Orbitron'; font-size: 1.2rem; color: var(--primary); text-decoration: none; }
+
+        /* MAIN CONTAINER */
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 15px;
+        }
+
+        .page-title { margin-bottom: 20px; font-size: 24px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+
+        /* TABS (n11 Style) */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: white;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab.active { background: var(--pink-accent); color: white; border-color: var(--pink-accent); }
+
+        /* ORDER CARD */
+        .order-list { display: flex; flex-direction: column; gap: 15px; }
+
+        .order-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            text-decoration: none;
+            color: inherit;
+            transition: 0.2s;
+        }
+
+        .order-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
+
+        .order-img { width: 80px; height: 80px; background: #f9f9f9; border-radius: 10px; object-fit: contain; }
+
+        .order-details b { display: block; font-size: 16px; margin-bottom: 5px; }
+        .order-details span { font-size: 13px; color: var(--text-gray); display: block; }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            background: #fff0f0;
+            color: var(--pink-accent);
+            text-transform: uppercase;
+        }
+
+        /* EMPTY STATE */
+        #empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 15px;
+            display: none;
+        }
+
+        /* MOBILE OPTIMIZATION */
+        @media (max-width: 600px) {
+            .order-card { grid-template-columns: auto 1fr; }
+            .order-card i.fa-chevron-right { display: none; }
+            .status-badge { grid-column: span 2; text-align: center; }
+            .page-title { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/" class="logo">BLI ACCOUNT</a>
+    <div class="user-menu"><i class="fa-solid fa-circle-user fa-xl"></i></div>
+</nav>
+
+<div class="container">
+    <div class="page-title">
+        <i class="fa-solid fa-box"></i> Siparişlerim
+    </div>
+
+    <div class="tabs">
+        <div class="tab active">Tümü</div>
+        <div class="tab">Kargodakiler</div>
+        <div class="tab">İptal Edilenler</div>
+    </div>
+
+    <div id="order-list" class="order-list">
+        </div>
+
+    <div id="empty-state">
+        <i class="fa-solid fa-cart-shopping fa-3x" style="color: #ddd; margin-bottom: 20px;"></i>
+        <h3>Yakın zamanda siparişiniz görünmüyor.</h3>
+        <p style="color: var(--text-gray); margin-top: 10px;">BLI Store'da keşfetmen gereken çok şey var!</p>
+        <a href="https://bliesports.com.tr" style="color: var(--primary); font-weight: bold; text-decoration: none; display: block; margin-top: 20px;">Mağazaya Git →</a>
+    </div>
+</div>
+
+<script>
+    // NOT: Shopier API'yi doğrudan JavaScript'ten çağırmak güvenli değildir.
+    // Bu veri, senin backend'inden (PHP/NodeJS) gelen veriymiş gibi kurgulandı.
+    
+    const API_ENDPOINT = "/api/get-orders.php"; // Senin veriyi çekeceğin adres
+    const shopierApiKey = "BURAYA_ANAHTARINI_GİRME_SERVER_TARAFI_KULLAN"; 
+
+    // Örnek Veri (Shopier'dan gelmiş gibi)
+    const mockOrders = [
+        /* {
+            id: "206687245331",
+            productName: "BLI V1 PRO Mouse",
+            date: "04.05.2026",
+            price: "299,99 TL",
+            status: "Hazırlanıyor",
+            img: "mouse.png",
+            trackingUrl: "https://www.shopier.com/takip"
+        } */
+    ];
+
+    function renderOrders(orders) {
+        const list = document.getElementById('order-list');
+        const empty = document.getElementById('empty-state');
+
+        if (orders.length === 0) {
+            list.style.display = 'none';
+            empty.style.display = 'block';
+            return;
+        }
+
+        list.innerHTML = orders.map(order => `
+            <a href="${order.trackingUrl}" class="order-card">
+                <img src="${order.img}" class="order-img" alt="Ürün">
+                <div class="order-details">
+                    <b>${order.productName}</b>
+                    <span>Sipariş No: ${order.id}</span>
+                    <span>Tarih: ${order.date}</span>
+                    <span style="color:black; font-weight:700; margin-top:5px;">${order.price}</span>
+                </div>
+                <div class="status-badge">${order.status}</div>
+                <i class="fa-solid fa-chevron-right" style="color:#ccc"></i>
+            </a>
+        `).join('');
+    }
+
+    // Sayfa açıldığında verileri yükle
+    document.addEventListener('DOMContentLoaded', () => {
+        // Şimdilik mock veriyi basıyoruz, gerçek API hazır olduğunda oradan çekeceğiz.
+        renderOrders(mockOrders);
+    });
+</script>
+
+</body>
+</html>
