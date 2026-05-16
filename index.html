@@ -728,15 +728,15 @@
     // Dropdown menüden bölüm değiştirme
     function changeSection(section) {
         if (section === 'dashboard') {
-            window.location.href = 'account.bliesports.com.tr/my-account';
+            window.location.href = '/my-account/index.html';
         } else if (section === 'orders') {
-            window.location.href = 'account.bliesports.com.tr/my-orders';
+            window.location.href = '/my-orders/index.html';
         } else if (section === 'wishlist') {
-            window.location.href = 'account.bliesports.com.tr/my-likes';
+            window.location.href = '/my-likes/index.html';
         } else if (section === 'coupons') {
-            window.location.href = 'account.bliesports.com.tr/my-coupons';
+            window.location.href = '/my-coupons/index.html';
         } else if (section === 'wallet') {
-            window.location.href = 'account.bliesports.com.tr/my-wallet';
+            window.location.href = '/my-wallet/index.html';
         }
         document.querySelector('.user-menu')?.classList.remove('active');
     }
@@ -827,4 +827,4 @@
     window.withdrawBalance = withdrawBalance;
 </script>
 </body>
-    </html>
+        </html>
