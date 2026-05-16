@@ -14,7 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <link rel="icon" type="image/png" href="logo1616 (1).png">
+    <link rel="icon" type="image/png" href="ChatGPT Image 4 May 2026 17_50_07.png">
 
     <style>
         * {
@@ -678,9 +678,10 @@
                 </div>
             </div>
 
-          <div class="dropdown-item" onclick="location.href='/my-orders/'">
-    <i class="fa-regular fa-clipboard"></i> Siparişlerim
-</div>
+            <div style="display: ${currentSection === 'orders' ? 'block' : 'none'}" id="ordersSection">
+                <h2 style="margin-bottom: 24px;">📦 Siparişlerim</h2>
+                ${ordersHtml}
+            </div>
 
             <div style="display: ${currentSection === 'wishlist' ? 'block' : 'none'}" id="wishlistSection">
                 <h2 style="margin-bottom: 24px;">❤️ Beğendiklerim</h2>
@@ -722,8 +723,17 @@
 
     // Dropdown menüden bölüm değiştirme
     function changeSection(section) {
-        currentSection = section;
-        renderMainContent();
+        if (section === 'dashboard') {
+            window.location.href = 'account.bliesports.com.tr/my-account';
+        } else if (section === 'orders') {
+            window.location.href = 'account.bliesports.com.tr/my-orders';
+        } else if (section === 'wishlist') {
+            window.location.href = 'account.bliesports.com.tr/my-likes';
+        } else if (section === 'coupons') {
+            window.location.href = 'account.bliesports.com.tr/my-coupons';
+        } else if (section === 'wallet') {
+            window.location.href = 'account.bliesports.com.tr/my-wallet';
+        }
         document.querySelector('.user-menu')?.classList.remove('active');
     }
 
@@ -813,4 +823,4 @@
     window.withdrawBalance = withdrawBalance;
 </script>
 </body>
-    </html>
+                                                                                                          </html>
