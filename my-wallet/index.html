@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BLI | Cüzdanım</title>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <!-- Font Awesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <link rel="icon" type="image/png" href="ChatGPT Image 4 May 2026 17_50_07.png">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Geri Butonu */
+        .back-button {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-size: 1.3rem;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Ana Kart */
+        .wallet-container {
+            width: 100%;
+            max-width: 550px;
+            padding: 20px;
+            margin: 20px;
+        }
+
+        .wallet-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 64px;
+            padding: 60px 40px;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        /* Cüzdan İkonu */
+        .wallet-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .wallet-icon i {
+            font-size: 48px;
+            color: white;
+        }
+
+        /* Bakiye Etiketi */
+        .balance-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 600;
+            color: #888;
+            margin-bottom: 15px;
+        }
+
+        /* Bakiye Sayısı */
+        .balance-amount {
+            font-size: 5rem;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+        }
+
+        .balance-currency {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #888;
+        }
+
+        /* Bakiye Açıklama */
+        .balance-description {
+            color: #aaa;
+            font-size: 0.85rem;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #eef2f6;
+            padding-bottom: 30px;
+        }
+
+        /* Bakiye Yükle Butonu */
+        .load-money-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 60px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 280px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .load-money-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .load-money-btn i {
+            font-size: 1.2rem;
+        }
+
+        /* İstatistik Kartları */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #eef2f6;
+        }
+
+        .stat-card {
+            background: #f8f9fc;
+            padding: 18px;
+            border-radius: 28px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: #f0f2f8;
+            transform: translateY(-2px);
+        }
+
+        .stat-card i {
+            font-size: 1.8rem;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-top: 5px;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 550px) {
+            .wallet-card {
+                padding: 40px 25px;
+                border-radius: 48px;
+            }
+            
+            .balance-amount {
+                font-size: 3.5rem;
+            }
+            
+            .balance-currency {
+                font-size: 1.5rem;
+            }
+            
+            .back-button {
+                top: 20px;
+                left: 20px;
+                width: 42px;
+                height: 42px;
+            }
+            
+            .stats-grid {
+                gap: 10px;
+            }
+            
+            .stat-card {
+                padding: 12px;
+            }
+            
+            .load-money-btn {
+                padding: 15px 30px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Toast Mesajı */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a2e;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 60px;
+            font-weight: 500;
+            z-index: 3000;
+            animation: slideUp 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Geri Butonu -->
+    <div class="back-button" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i>
+    </div>
+
+    <!-- Ana Cüzdan Konteynırı -->
+    <div class="wallet-container" id="walletContainer">
+        <div class="wallet-card" id="walletCard">
+            <div id="contentArea">
+                <!-- Loading durumu buraya gelecek -->
+                <div style="text-align: center; padding: 40px;">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top: 20px; color: #888;">Yükleniyor...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ---------- FIREBASE KONFİG ----------
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0PdRozDzBzSyuuNIRG67xg-W3UJBfJD8",
+            authDomain: "bliesports.firebaseapp.com",
+            projectId: "bliesports",
+            storageBucket: "bliesports.firebasestorage.app",
+            appId: "1:880767104142:web:5edbe111f42f16ab1545df"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+
+        // Toast mesajı
+        function showToast(msg) {
+            const existingToast = document.querySelector('.toast');
+            if(existingToast) existingToast.remove();
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        // Geri gitme fonksiyonu
+        function goBack() {
+            if(document.referrer && document.referrer.includes(window.location.hostname)) {
+                window.history.back();
+            } else {
+                window.location.href = 'account.bliesports.com.tr/my-account';
+            }
+        }
+
+        // Bakiyeyi çek
+        async function getBalance() {
+            if(!currentUser) return 0;
+            const doc = await db.collection('users').doc(currentUser.uid).get();
+            if(doc.exists) return doc.data().balance || 0;
+            return 0;
+        }
+
+        // Cüzdan içeriğini render et
+        async function renderWallet() {
+            const contentArea = document.getElementById('contentArea');
+            
+            if(!currentUser) {
+                contentArea.innerHTML = `
+                    <div style="text-align: center;">
+                        <div class="wallet-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <h2 style="margin-bottom: 20px; color: #1a1a2e;">Giriş Yapmalısınız</h2>
+                        <p style="color: #888; margin-bottom: 30px;">Cüzdanınızı görmek için lütfen giriş yapın</p>
+                        <button class="load-money-btn" onclick="redirectToLogin()">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Giriş Yap
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const balance = await getBalance();
+            const formattedBalance = balance.toFixed(2).replace('.', ',');
+            
+            contentArea.innerHTML = `
+                <div class="wallet-icon">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                
+                <div class="balance-label">
+                    GÜNCEL BAKİYEN
+                </div>
+                
+                <div class="balance-amount">
+                    ${formattedBalance}<span class="balance-currency">₺</span>
+                </div>
+                
+                <div class="balance-description">
+                    <i class="fas fa-shield-alt" style="margin-right: 6px;"></i> 
+                    Hesabınızdaki toplam bakiye
+                </div>
+                
+                <button class="load-money-btn" onclick="loadMoney()">
+                    <i class="fas fa-plus-circle"></i>
+                    Bakiye Yükle
+                </button>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-arrow-up"></i>
+                        <div class="stat-label">Toplam Yükleme</div>
+                        <div class="stat-value">${formattedBalance} ₺</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-arrow-down"></i>
+                        <div class="stat-label">Toplam Harcama</div>
+                        <div class="stat-value">0,00 ₺</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eef2f6;">
+                    <p style="font-size: 0.7rem; color: #aaa;">
+                        <i class="fas fa-lock"></i> Güvenli ödeme altyapısı ile korunmaktadır.
+                    </p>
+                </div>
+            `;
+        }
+
+        // Bakiye Yükleme Butonu
+        function loadMoney() {
+            window.location.href = '/my-wallet/load-money/index.html';
+        }
+
+        // Login'e yönlendirme
+        function redirectToLogin() {
+            window.location.href = 'account.bliesports.com.tr/my-account';
+        }
+
+        // Auth durumu değiştiğinde
+        auth.onAuthStateChanged(async (user) => {
+            currentUser = user;
+            await renderWallet();
+        });
+
+        // Global fonksiyonlar
+        window.goBack = goBack;
+        window.loadMoney = loadMoney;
+        window.redirectToLogin = redirectToLogin;
+    </script>
+</body>
+</html>
