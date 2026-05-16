@@ -482,6 +482,7 @@
             await auth.signInWithEmailAndPassword(email, pass);
             showToast("Giriş başarılı!");
             closeAuthModal();
+            window.location.reload();
         } catch(e) {
             showToast("Hata: " + e.message);
         }
@@ -506,6 +507,7 @@
             });
             showToast("Kayıt başarılı! Hoşgeldin.");
             closeAuthModal();
+            window.location.reload();
         } catch(e) {
             showToast("Hata: " + e.message);
         }
@@ -515,6 +517,7 @@
     async function logout() {
         await auth.signOut();
         showToast("Çıkış yapıldı.");
+        window.location.reload();
     }
 
     // ---------- SİPARİŞLER (Demo - Firestore'dan çekilecek) ----------
@@ -653,7 +656,7 @@
             coupons.forEach(coupon => {
                 couponsHtml += `
                     <div class="order-card">
-                        <strong>${coupon.code}</strong> - ${coupon.discount} TL indirim
+                        <strong><i class="fa-regular fa-ticket" style="margin-right: 8px; color:#ff3b30;"></i>${coupon.code}</strong> - ${coupon.discount} TL indirim
                         <div style="font-size:0.7rem; color:#888;">Son kullanım: ${coupon.expiry}</div>
                     </div>
                 `;
@@ -679,25 +682,26 @@
             </div>
 
             <div style="display: ${currentSection === 'orders' ? 'block' : 'none'}" id="ordersSection">
-                <h2 style="margin-bottom: 24px;">📦 Siparişlerim</h2>
+                <h2 style="margin-bottom: 24px;"><i class="fa-regular fa-clipboard"></i> Siparişlerim</h2>
                 ${ordersHtml}
             </div>
 
             <div style="display: ${currentSection === 'wishlist' ? 'block' : 'none'}" id="wishlistSection">
-                <h2 style="margin-bottom: 24px;">❤️ Beğendiklerim</h2>
+                <h2 style="margin-bottom: 24px;"><i class="fa-regular fa-heart"></i> Beğendiklerim</h2>
                 ${wishlistHtml}
             </div>
 
             <div style="display: ${currentSection === 'coupons' ? 'block' : 'none'}" id="couponsSection">
-                <h2 style="margin-bottom: 24px;">🎫 Kuponlarım</h2>
+                <h2 style="margin-bottom: 24px;"><i class="fa-regular fa-ticket"></i> Kuponlarım</h2>
                 ${couponsHtml}
             </div>
 
             <div style="display: ${currentSection === 'wallet' ? 'block' : 'none'}" id="walletSection">
                 <div class="wallet-card">
-                    <h3>💰 Mali Geçmişim</h3>
+                    <h3><i class="fa-regular fa-wallet"></i> Cüzdanım</h3>
                     <p style="margin-top:16px;">Güncel bakiye: <strong>${balance} TL</strong></p>
                     <button class="btn-wallet" style="margin-top:16px;" onclick="showAddBalanceModal()">Bakiye Yükle</button>
+                    <button class="btn-wallet" style="margin-top:16px; margin-left:12px;" onclick="showWithdrawModal()">Bakiye Çek</button>
                 </div>
             </div>
         `;
@@ -823,4 +827,4 @@
     window.withdrawBalance = withdrawBalance;
 </script>
 </body>
-                                                                                                          </html>
+    </html>
