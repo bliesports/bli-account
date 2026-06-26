@@ -204,7 +204,7 @@
         }
 
         /* ======================================== */
-        /* ===== ONAY EKRANI (YENİ) ===== */
+        /* ===== ONAY EKRANI ===== */
         /* ======================================== */
         .oauth-container {
             max-width: 480px;
@@ -556,7 +556,6 @@
             font-size: 0.8rem;
         }
 
-        /* ===== HATA SAYFASI ===== */
         .oauth-error {
             text-align: center;
             padding: 60px 20px;
@@ -579,6 +578,11 @@
             border-radius: 40px;
             text-decoration: none;
             font-weight: 600;
+        }
+
+        /* Aktif bölüm göstergesi */
+        .section-active {
+            background: #f0f2f5;
         }
     </style>
 </head>
@@ -654,9 +658,6 @@
     const oauthState = urlParams.get('state');
     const isOAuthRequest = oauthClientId && oauthRedirectUri;
 
-    // Geçici kodları saklamak için (gerçekte Firestore'da saklanmalı)
-    const oauthCodes = {};
-
     // ============================================
     // TOAST
     // ============================================
@@ -696,12 +697,7 @@
             await auth.signInWithEmailAndPassword(email, pass);
             showToast("Giriş başarılı!");
             closeAuthModal();
-            // OAuth isteği varsa, girişten sonra onay ekranı gelsin
-            if (isOAuthRequest) {
-                window.location.reload();
-            } else {
-                window.location.reload();
-            }
+            window.location.reload();
         } catch(e) {
             showToast("Hata: " + e.message);
         }
@@ -726,11 +722,7 @@
             });
             showToast("Kayıt başarılı! Hoşgeldin.");
             closeAuthModal();
-            if (isOAuthRequest) {
-                window.location.reload();
-            } else {
-                window.location.reload();
-            }
+            window.location.reload();
         } catch(e) {
             showToast("Hata: " + e.message);
         }
@@ -742,7 +734,7 @@
     async function logout() {
         await auth.signOut();
         showToast("Çıkış yapıldı.");
-        window.location.reload();
+        window.location.href = '/';
     }
 
     // ============================================
@@ -756,36 +748,36 @@
 
         // Geçici kod oluştur
         const code = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-        oauthCodes[code] = {
-            userId: currentUser.uid,
-            clientId: oauthClientId,
-            createdAt: Date.now()
-        };
-
-        // Kullanıcı bilgilerini al
-        const userDoc = await db.collection('users').doc(currentUser.uid).get();
-        const userData = userDoc.data() || {};
-
-        // Kodu Firestore'a da kaydedelim (güvenlik için)
+        
+        // Kodu Firestore'a kaydet
         await db.collection('oauth_codes').doc(code).set({
             userId: currentUser.uid,
             clientId: oauthClientId,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            used: false
+            used: false,
+            userEmail: currentUser.email,
+            userName: currentUser.displayName || 'Kullanıcı'
         });
 
+        // Yönlendirme URL'ini oluştur
+        let redirectUrl = oauthRedirectUri;
+        if (redirectUrl.includes('?')) {
+            redirectUrl += `&code=${code}&state=${oauthState || ''}`;
+        } else {
+            redirectUrl += `?code=${code}&state=${oauthState || ''}`;
+        }
+
         // Kullanıcıyı yönlendir
-        const redirectUrl = oauthRedirectUri.includes('?') 
-            ? `${oauthRedirectUri}&code=${code}&state=${oauthState}`
-            : `${oauthRedirectUri}?code=${code}&state=${oauthState}`;
-        
         window.location.href = redirectUrl;
     }
 
     function handleOAuthDeny() {
-        const redirectUrl = oauthRedirectUri.includes('?')
-            ? `${oauthRedirectUri}&error=access_denied&state=${oauthState}`
-            : `${oauthRedirectUri}?error=access_denied&state=${oauthState}`;
+        let redirectUrl = oauthRedirectUri;
+        if (redirectUrl.includes('?')) {
+            redirectUrl += `&error=access_denied&state=${oauthState || ''}`;
+        } else {
+            redirectUrl += `?error=access_denied&state=${oauthState || ''}`;
+        }
         window.location.href = redirectUrl;
     }
 
@@ -873,10 +865,24 @@
     // SİPARİŞLER (Demo)
     // ============================================
     async function getOrders() {
-        return [
-            { id: "BLI-2401", date: "15 Mart 2026", total: 1899, status: "delivered", items: "BLI V1 PRO Mouse" },
-            { id: "BLI-2402", date: "28 Şubat 2026", total: 749, status: "shipped", items: "Elite Jersey V2" }
-        ];
+        if(!currentUser) return [];
+        try {
+            const snapshot = await db.collection('orders')
+                .where('userId', '==', currentUser.uid)
+                .orderBy('createdAt', 'desc')
+                .get();
+            const orders = [];
+            snapshot.forEach(doc => {
+                orders.push({ id: doc.id, ...doc.data() });
+            });
+            return orders;
+        } catch(e) {
+            // Demo veri döndür
+            return [
+                { id: "BLI-2401", date: "15 Mart 2026", total: 1899, status: "delivered", items: "BLI V1 PRO Mouse" },
+                { id: "BLI-2402", date: "28 Şubat 2026", total: 749, status: "shipped", items: "Elite Jersey V2" }
+            ];
+        }
     }
 
     // ============================================
@@ -884,9 +890,13 @@
     // ============================================
     async function getBalance() {
         if(!currentUser) return 0;
-        const doc = await db.collection('users').doc(currentUser.uid).get();
-        if(doc.exists) return doc.data().balance || 0;
-        return 0;
+        try {
+            const doc = await db.collection('users').doc(currentUser.uid).get();
+            if(doc.exists) return doc.data().balance || 0;
+            return 0;
+        } catch(e) {
+            return 0;
+        }
     }
 
     async function addBalance(amount) {
@@ -914,9 +924,13 @@
     // ============================================
     async function getWishlist() {
         if(!currentUser) return [];
-        const doc = await db.collection('users').doc(currentUser.uid).get();
-        if(doc.exists) return doc.data().wishlist || [];
-        return [];
+        try {
+            const doc = await db.collection('users').doc(currentUser.uid).get();
+            if(doc.exists) return doc.data().wishlist || [];
+            return [];
+        } catch(e) {
+            return [];
+        }
     }
 
     async function removeFromWishlist(index) {
@@ -932,9 +946,13 @@
     // ============================================
     async function getCoupons() {
         if(!currentUser) return [];
-        const doc = await db.collection('users').doc(currentUser.uid).get();
-        if(doc.exists) return doc.data().coupons || [];
-        return [];
+        try {
+            const doc = await db.collection('users').doc(currentUser.uid).get();
+            if(doc.exists) return doc.data().coupons || [];
+            return [];
+        } catch(e) {
+            return [];
+        }
     }
 
     // ============================================
@@ -984,7 +1002,7 @@
 
         let ordersHtml = '<div class="orders-list">';
         if(orders.length === 0) {
-            ordersHtml += '<p style="text-align:center; padding:40px;">Henüz siparişin yok.</p>';
+            ordersHtml += '<p style="text-align:center; padding:40px; color:#888;">Henüz siparişin yok.</p>';
         } else {
             orders.forEach(order => {
                 let statusClass = order.status === 'delivered' ? 'status-delivered' : (order.status === 'shipped' ? 'status-shipped' : 'status-pending');
@@ -995,10 +1013,10 @@
                             <span class="order-id">${order.id}</span>
                             <span class="order-status ${statusClass}">${statusText}</span>
                         </div>
-                        <div>${order.items}</div>
+                        <div>${order.items || 'Ürün'}</div>
                         <div style="display:flex; justify-content:space-between; margin-top:12px;">
-                            <span style="color:#888;">${order.date}</span>
-                            <span style="font-weight:700;">${order.total} TL</span>
+                            <span style="color:#888;">${order.date || 'Tarih yok'}</span>
+                            <span style="font-weight:700;">${order.total || 0} TL</span>
                         </div>
                     </div>
                 `;
@@ -1008,13 +1026,15 @@
 
         let wishlistHtml = '<div>';
         if(wishlist.length === 0) {
-            wishlistHtml += '<p style="text-align:center; padding:40px;">Beğendiğin ürün yok.</p>';
+            wishlistHtml += '<p style="text-align:center; padding:40px; color:#888;">Beğendiğin ürün yok.</p>';
         } else {
             wishlist.forEach((item, idx) => {
                 wishlistHtml += `
                     <div class="liked-item">
-                        <div><strong>${item.name}</strong><br><span style="font-size:0.8rem;">${item.price} TL</span></div>
-                        <button onclick="removeFromWishlist(${idx})" style="background:none; border:none; color:#ff3b30;"><i class="fa-regular fa-trash-can"></i></button>
+                        <div><strong>${item.name || 'Ürün'}</strong><br><span style="font-size:0.8rem;">${item.price || 0} TL</span></div>
+                        <button onclick="removeFromWishlist(${idx})" style="background:none; border:none; color:#ff3b30; cursor:pointer;">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
                     </div>
                 `;
             });
@@ -1023,13 +1043,13 @@
 
         let couponsHtml = '<div>';
         if(coupons.length === 0) {
-            couponsHtml += '<p style="text-align:center; padding:40px;">Aktif kuponun yok.</p>';
+            couponsHtml += '<p style="text-align:center; padding:40px; color:#888;">Aktif kuponun yok.</p>';
         } else {
             coupons.forEach(coupon => {
                 couponsHtml += `
                     <div class="order-card">
-                        <strong><i class="fa-regular fa-ticket" style="margin-right: 8px; color:#ff3b30;"></i>${coupon.code}</strong> - ${coupon.discount} TL indirim
-                        <div style="font-size:0.7rem; color:#888;">Son kullanım: ${coupon.expiry}</div>
+                        <strong><i class="fa-regular fa-ticket" style="margin-right: 8px; color:#ff3b30;"></i>${coupon.code || 'Kupon'}</strong> - ${coupon.discount || 0} TL indirim
+                        <div style="font-size:0.7rem; color:#888;">Son kullanım: ${coupon.expiry || 'Belirtilmemiş'}</div>
                     </div>
                 `;
             });
@@ -1100,20 +1120,10 @@
     }
 
     // ============================================
-    // BÖLÜM DEĞİŞTİRME
+    // BÖLÜM DEĞİŞTİRME (DÜZELTİLDİ)
     // ============================================
     function changeSection(section) {
-        if (section === 'dashboard') {
-            currentSection = 'dashboard';
-        } else if (section === 'orders') {
-            currentSection = 'orders';
-        } else if (section === 'wishlist') {
-            currentSection = 'wishlist';
-        } else if (section === 'coupons') {
-            currentSection = 'coupons';
-        } else if (section === 'wallet') {
-            currentSection = 'wallet';
-        }
+        currentSection = section;
         document.querySelector('.user-menu')?.classList.remove('active');
         renderMainContent();
     }
@@ -1214,4 +1224,4 @@
     window.handleOAuthDeny = handleOAuthDeny;
 </script>
 </body>
-                </html>
+    </html>
