@@ -199,7 +199,6 @@
             padding: 0 5%;
         }
 
-        /* ONAY EKRANI */
         .oauth-container {
             max-width: 480px;
             margin: 40px auto;
@@ -484,366 +483,431 @@
 </head>
 <body>
 
-<nav class="navbar">
-    <div class="logo" onclick="location.href='/'">
-        <img src="ChatGPT Image 4 May 2026 17_50_07.png" alt="BLI">
-    </div>
-    <div id="navRightArea"></div>
-</nav>
-
-<div class="main-container" id="mainContainer"></div>
-
-<footer>
-    <p>© 2026 BLI ESPORTS — Tüm hakları saklıdır.</p>
-</footer>
-
-<!-- Modal -->
-<div class="modal" id="authModal">
-    <div class="modal-content">
-        <div id="loginFormContent">
-            <h3 style="margin-bottom: 20px;">Giriş Yap</h3>
-            <input type="email" id="loginEmail" placeholder="E-posta">
-            <input type="password" id="loginPassword" placeholder="Şifre">
-            <button class="btn-login" style="width:100%; margin-top:12px;" onclick="handleLogin()">Giriş Yap</button>
-            <p style="margin-top: 20px; text-align:center;">
-                Hesabın yok mu? <a href="#" onclick="switchToRegister()" style="color:#ff3b30;">Kaydol</a>
-            </p>
+    <nav class="navbar">
+        <div class="logo" onclick="location.href='/'">
+            <img src="ChatGPT Image 4 May 2026 17_50_07.png" alt="BLI">
         </div>
-        <div id="registerFormContent" style="display:none;">
-            <h3 style="margin-bottom: 20px;">Kaydol</h3>
-            <input type="text" id="regName" placeholder="Ad Soyad">
-            <input type="email" id="regEmail" placeholder="E-posta">
-            <input type="password" id="regPassword" placeholder="Şifre">
-            <button class="btn-login" style="width:100%; margin-top:12px;" onclick="handleRegister()">Kaydol</button>
-            <p style="margin-top: 20px; text-align:center;">
-                Zaten hesabın var mı? <a href="#" onclick="switchToLogin()" style="color:#ff3b30;">Giriş Yap</a>
-            </p>
+        <div id="navRightArea"></div>
+    </nav>
+
+    <div class="main-container" id="mainContainer"></div>
+
+    <footer>
+        <p>© 2026 BLI ESPORTS — Tüm hakları saklıdır.</p>
+    </footer>
+
+    <!-- Modal -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <div id="loginFormContent">
+                <h3 style="margin-bottom: 20px;">Giriş Yap</h3>
+                <input type="email" id="loginEmail" placeholder="E-posta">
+                <input type="password" id="loginPassword" placeholder="Şifre">
+                <button class="btn-login" style="width:100%; margin-top:12px;" onclick="handleLogin()">Giriş Yap</button>
+                <p style="margin-top: 20px; text-align:center;">
+                    Hesabın yok mu? <a href="#" onclick="switchToRegister()" style="color:#ff3b30;">Kaydol</a>
+                </p>
+            </div>
+            <div id="registerFormContent" style="display:none;">
+                <h3 style="margin-bottom: 20px;">Kaydol</h3>
+                <input type="text" id="regName" placeholder="Ad Soyad">
+                <input type="email" id="regEmail" placeholder="E-posta">
+                <input type="password" id="regPassword" placeholder="Şifre">
+                <button class="btn-login" style="width:100%; margin-top:12px;" onclick="handleRegister()">Kaydol</button>
+                <p style="margin-top: 20px; text-align:center;">
+                    Zaten hesabın var mı? <a href="#" onclick="switchToLogin()" style="color:#ff3b30;">Giriş Yap</a>
+                </p>
+            </div>
         </div>
     </div>
-</div>
-<script>
 
-    
-    // ============================================
-    // FIREBASE
-    // ============================================
-    const firebaseConfig = {
-        apiKey: "AIzaSyB0PdRozDzBzSyuuNIRG67xg-W3UJBfJD8",
-        authDomain: "bliesports.firebaseapp.com",
-        projectId: "bliesports",
-        storageBucket: "bliesports.firebasestorage.app",
-        appId: "1:880767104142:web:5edbe111f42f16ab1545df"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    <script>
+        // ============================================
+        // FIREBASE KONFIG
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0PdRozDzBzSyuuNIRG67xg-W3UJBfJD8",
+            authDomain: "bliesports.firebaseapp.com",
+            projectId: "bliesports",
+            storageBucket: "bliesports.firebasestorage.app",
+            appId: "1:880767104142:web:5edbe111f42f16ab1545df"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-    let currentUser = null;
+        let currentUser = null;
 
-    // ============================================
-    // URL'DEN GELEN PARAMETRELER
-    // ============================================
-    const urlParams = new URLSearchParams(window.location.search);
-    const CLIENT_ID = urlParams.get('client_id');
-    const REDIRECT_URI = urlParams.get('redirect_uri');
-    const STATE = urlParams.get('state');
-    const IS_OAUTH = CLIENT_ID && REDIRECT_URI;
+        // ============================================
+        // URL'DEN GELEN PARAMETRELER
+        // ============================================
+        const urlParams = new URLSearchParams(window.location.search);
+        const CLIENT_ID = urlParams.get('client_id');
+        const REDIRECT_URI = urlParams.get('redirect_uri');
+        const STATE = urlParams.get('state');
+        const IS_OAUTH = CLIENT_ID && REDIRECT_URI;
 
-    // ============================================
-    // TOAST MESAJI
-    // ============================================
-    function showToast(msg) {
-        const t = document.createElement('div');
-        t.className = 'toast';
-        t.innerText = msg;
-        document.body.appendChild(t);
-        setTimeout(() => t.remove(), 2500);
-    }
-
-    // ============================================
-    // MODAL
-    // ============================================
-    function openModal() { document.getElementById('authModal').classList.add('active'); }
-    function closeModal() { document.getElementById('authModal').classList.remove('active'); }
-    window.switchToRegister = function() {
-        document.getElementById('loginFormContent').style.display = 'none';
-        document.getElementById('registerFormContent').style.display = 'block';
-    };
-    window.switchToLogin = function() {
-        document.getElementById('loginFormContent').style.display = 'block';
-        document.getElementById('registerFormContent').style.display = 'none';
-    };
-
-    // ============================================
-    // GİRİŞ / KAYIT
-    // ============================================
-    async function handleLogin() {
-        const email = document.getElementById('loginEmail').value;
-        const pass = document.getElementById('loginPassword').value;
-        try {
-            await auth.signInWithEmailAndPassword(email, pass);
-            showToast('Giriş başarılı!');
-            closeModal();
-            window.location.reload();
-        } catch (e) { showToast('Hata: ' + e.message); }
-    }
-
-    async function handleRegister() {
-        const name = document.getElementById('regName').value;
-        const email = document.getElementById('regEmail').value;
-        const pass = document.getElementById('regPassword').value;
-        if (!name || !email || !pass) { showToast('Tüm alanları doldur!'); return; }
-        try {
-            const cred = await auth.createUserWithEmailAndPassword(email, pass);
-            await cred.user.updateProfile({ displayName: name });
-            await db.collection('users').doc(cred.user.uid).set({ name, email, balance: 0, createdAt: new Date() });
-            showToast('Kayıt başarılı!');
-            closeModal();
-            window.location.reload();
-        } catch (e) { showToast('Hata: ' + e.message); }
-    }
-
-    async function logout() {
-        await auth.signOut();
-        showToast('Çıkış yapıldı.');
-        window.location.href = '/';
-    }
-
-    // ============================================
-    // **** İŞTE ASIL ONAY FONKSİYONU (DÜZGÜN ÇALIŞAN) ****
-    // ============================================
-    async function allowAccess() {
-        if (!currentUser) {
-            showToast('Lütfen önce giriş yapın.');
-            return;
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(msg) {
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.innerText = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2500);
         }
 
-        // 1. Benzersiz Kod Oluştur
-        const code = 'BLI_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+        // ============================================
+        // MODAL
+        // ============================================
+        function openModal() {
+            document.getElementById('authModal').classList.add('active');
+        }
 
-        try {
-            // 2. Kodu Firestore'a Kaydet (Token doğrulama için)
-            await db.collection('oauth_codes').doc(code).set({
-                userId: currentUser.uid,
-                clientId: CLIENT_ID,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                userEmail: currentUser.email,
-                userName: currentUser.displayName || 'Kullanıcı'
-            });
+        function closeModal() {
+            document.getElementById('authModal').classList.remove('active');
+        }
 
-            // 3. Yönlendirme URL'sini Oluştur
-            let targetUrl = REDIRECT_URI;
-            
-            // Eğer URL'de zaten '?' varsa '&' ile yoksa '?' ile ekle
-            if (targetUrl.includes('?')) {
-                targetUrl += '&code=' + encodeURIComponent(code);
-            } else {
-                targetUrl += '?code=' + encodeURIComponent(code);
+        window.switchToRegister = function() {
+            document.getElementById('loginFormContent').style.display = 'none';
+            document.getElementById('registerFormContent').style.display = 'block';
+        };
+
+        window.switchToLogin = function() {
+            document.getElementById('loginFormContent').style.display = 'block';
+            document.getElementById('registerFormContent').style.display = 'none';
+        };
+
+        // ============================================
+        // GİRİŞ / KAYIT
+        // ============================================
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPassword').value;
+            try {
+                await auth.signInWithEmailAndPassword(email, pass);
+                showToast('Giriş başarılı!');
+                closeModal();
+                window.location.reload();
+            } catch (e) {
+                showToast('Hata: ' + e.message);
             }
-            
-            // State varsa onu da ekle
+        }
+
+        async function handleRegister() {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const pass = document.getElementById('regPassword').value;
+            if (!name || !email || !pass) {
+                showToast('Tüm alanları doldur!');
+                return;
+            }
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, pass);
+                await cred.user.updateProfile({ displayName: name });
+                await db.collection('users').doc(cred.user.uid).set({
+                    name: name,
+                    email: email,
+                    balance: 0,
+                    createdAt: new Date()
+                });
+                showToast('Kayıt başarılı!');
+                closeModal();
+                window.location.reload();
+            } catch (e) {
+                showToast('Hata: ' + e.message);
+            }
+        }
+
+        // ============================================
+        // ÇIKIŞ
+        // ============================================
+        async function logout() {
+            await auth.signOut();
+            showToast('Çıkış yapıldı.');
+            window.location.href = '/';
+        }
+
+        // ============================================
+        // **** İZİN VER (ÇALIŞAN) ****
+        // ============================================
+        async function allowAccess() {
+            if (!currentUser) {
+                showToast('Lütfen giriş yapın.');
+                return;
+            }
+
+            const code = 'BLI_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+
+            try {
+                // Firebase'e kaydet
+                await db.collection('oauth_codes').doc(code).set({
+                    userId: currentUser.uid,
+                    clientId: CLIENT_ID,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    userEmail: currentUser.email,
+                    userName: currentUser.displayName || 'Kullanıcı'
+                });
+
+                // Yönlendirme URL'si oluştur
+                let targetUrl = REDIRECT_URI;
+                if (targetUrl.includes('?')) {
+                    targetUrl += '&code=' + encodeURIComponent(code);
+                } else {
+                    targetUrl += '?code=' + encodeURIComponent(code);
+                }
+                if (STATE) {
+                    targetUrl += '&state=' + encodeURIComponent(STATE);
+                }
+
+                console.log('✅ YÖNLENDİRİLİYOR:', targetUrl);
+                window.location.href = targetUrl;
+
+            } catch (error) {
+                console.error('❌ HATA:', error);
+                showToast('Hata: ' + error.message);
+            }
+        }
+
+        // ============================================
+        // REDDET
+        // ============================================
+        function denyAccess() {
+            let targetUrl = REDIRECT_URI;
+            if (targetUrl.includes('?')) {
+                targetUrl += '&error=access_denied';
+            } else {
+                targetUrl += '?error=access_denied';
+            }
             if (STATE) {
                 targetUrl += '&state=' + encodeURIComponent(STATE);
             }
-
-            // 4. Konsola Yaz (Hata Ayıklama)
-            console.log('✅ ONAY BAŞARILI! YÖNLENDİRİLİYOR...');
-            console.log('📤 HEDEF URL:', targetUrl);
-            console.log('🔑 OLUŞTURULAN KOD:', code);
-
-            // 5. YÖNLENDİR
+            console.log('❌ REDDEDİLDİ:', targetUrl);
             window.location.href = targetUrl;
-
-        } catch (error) {
-            console.error('❌ FIREBASE HATASI:', error);
-            showToast('Bir hata oluştu: ' + error.message);
-        }
-    }
-
-    // ============================================
-    // ONAY - REDDET
-    // ============================================
-    function denyAccess() {
-        let targetUrl = REDIRECT_URI;
-        if (targetUrl.includes('?')) {
-            targetUrl += '&error=access_denied';
-        } else {
-            targetUrl += '?error=access_denied';
-        }
-        if (STATE) targetUrl += '&state=' + encodeURIComponent(STATE);
-        
-        console.log('❌ REDDEDİLDİ, YÖNLENDİRİLİYOR:', targetUrl);
-        window.location.href = targetUrl;
-    }
-
-    // ============================================
-    // ONAY EKRANINI RENDER ET
-    // ============================================
-    function renderOAuth() {
-        const container = document.getElementById('mainContainer');
-        const name = currentUser?.displayName || 'Kullanıcı';
-        const email = currentUser?.email || '';
-        const initial = name.charAt(0).toUpperCase();
-
-        container.innerHTML = `
-            <div class="oauth-container">
-                <div class="oauth-brand">
-                    <img src="ChatGPT Image 4 May 2026 17_50_07.png" alt="BLI">
-                    <h2>BLI <span>ESPORTS</span></h2>
-                </div>
-                <div class="oauth-app">
-                    <span class="app-icon">🎮</span>
-                    <div class="app-name">${CLIENT_ID}</div>
-                    <div class="app-desc">hesabınıza erişmek istiyor</div>
-                </div>
-                <div class="oauth-permissions">
-                    <div class="title">🔓 Gönderilecek bilgiler</div>
-                    <div class="item">E-posta adresiniz</div>
-                    <div class="item">Kullanıcı adınız</div>
-                </div>
-                <div class="oauth-user">
-                    <div class="avatar">${initial}</div>
-                    <div class="info">
-                        <div class="name">${name}</div>
-                        <div class="email">${email}</div>
-                        <div class="status">✅ Oturum açık</div>
-                    </div>
-                </div>
-                <div class="oauth-actions">
-                    <button class="btn-allow" onclick="allowAccess()">✅ İzin Ver</button>
-                    <button class="btn-deny" onclick="denyAccess()">❌ Reddet</button>
-                </div>
-                <div class="oauth-footer">
-                    <a href="#">Gizlilik</a> · <a href="#">Kullanım Şartları</a>
-                </div>
-            </div>
-        `;
-    }
-
-    // ============================================
-    // CÜZDAN & ANA SAYFA RENDER
-    // ============================================
-    async function getBalance() {
-        if (!currentUser) return 0;
-        try {
-            const doc = await db.collection('users').doc(currentUser.uid).get();
-            return doc.exists ? doc.data().balance || 0 : 0;
-        } catch { return 0; }
-    }
-
-    async function renderMain() {
-        const container = document.getElementById('mainContainer');
-
-        if (IS_OAUTH && currentUser) {
-            renderOAuth();
-            return;
-        }
-        if (IS_OAUTH && !currentUser) {
-            container.innerHTML = `
-                <div class="welcome-card">
-                    <h1>🔐 Giriş Yap</h1>
-                    <p>"${CLIENT_ID}" uygulamasına izin vermek için giriş yap.</p>
-                </div>
-                <div style="text-align:center; padding:40px;">
-                    <button class="btn-login" onclick="openModal()">Giriş Yap / Kaydol</button>
-                </div>
-            `;
-            return;
-        }
-        if (!currentUser) {
-            container.innerHTML = `
-                <div class="welcome-card">
-                    <h1>BLI Hesabına Hoşgeldin</h1>
-                    <p>Giriş yaparak hesabını yönet.</p>
-                </div>
-                <div style="text-align:center; padding:60px;">
-                    <button class="btn-login" onclick="openModal()">Giriş Yap / Kaydol</button>
-                </div>
-            `;
-            return;
         }
 
-        const balance = await getBalance();
-        container.innerHTML = `
-            <div class="welcome-card">
-                <h1>Merhaba, ${currentUser.displayName?.split(' ')[0] || 'Kullanıcı'} 👋</h1>
-                <p>Hesabını yönet.</p>
-            </div>
-            <div class="wallet-card">
-                <h3><i class="fa-regular fa-credit-card"></i> Cüzdanım</h3>
-                <div class="wallet-amount">${balance} TL</div>
-                <div class="balance-actions">
-                    <button class="btn-wallet" onclick="showAdd()">Bakiye Yükle</button>
-                    <button class="btn-wallet" onclick="showWithdraw()">Bakiye Çek</button>
-                </div>
-            </div>
-        `;
-    }
-
-    // ============================================
-    // NAVBAR
-    // ============================================
-    function renderNavbar() {
-        const area = document.getElementById('navRightArea');
-        if (currentUser) {
-            const name = currentUser.displayName || currentUser.email?.split('@')[0] || 'Kullanıcı';
+        // ============================================
+        // ONAY EKRANI
+        // ============================================
+        function renderOAuth() {
+            const container = document.getElementById('mainContainer');
+            const name = currentUser?.displayName || 'Kullanıcı';
+            const email = currentUser?.email || '';
             const initial = name.charAt(0).toUpperCase();
-            area.innerHTML = `
-                <div class="user-menu" id="userMenu">
-                    <div class="user-trigger" onclick="toggleMenu()">
-                        <div class="user-avatar">${initial}</div>
-                        <span class="user-name">${name}</span>
-                        <i class="fa-solid fa-chevron-down user-chevron"></i>
-                    </div>
-                    <div class="user-dropdown">
-                        <div class="dropdown-header">
-                            <h4>${name}</h4>
-                            <p>${currentUser.email}</p>
+
+            container.innerHTML = `
+                    <div class="oauth-container">
+                        <div class="oauth-brand">
+                            <img src="ChatGPT Image 4 May 2026 17_50_07.png" alt="BLI">
+                            <h2>BLI <span>ESPORTS</span></h2>
                         </div>
-                        <div class="dropdown-items">
-                            <div class="dropdown-item" onclick="location.reload()">
-                                <i class="fa-regular fa-user"></i> Hesabım
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <div class="dropdown-item logout-item" onclick="logout()">
-                                <i class="fa-solid fa-arrow-right-from-bracket"></i> Çıkış Yap
+                        <div class="oauth-app">
+                            <span class="app-icon">🎮</span>
+                            <div class="app-name">${CLIENT_ID}</div>
+                            <div class="app-desc">hesabınıza erişmek istiyor</div>
+                        </div>
+                        <div class="oauth-permissions">
+                            <div class="title">🔓 Gönderilecek bilgiler</div>
+                            <div class="item">E-posta adresiniz</div>
+                            <div class="item">Kullanıcı adınız</div>
+                        </div>
+                        <div class="oauth-user">
+                            <div class="avatar">${initial}</div>
+                            <div class="info">
+                                <div class="name">${name}</div>
+                                <div class="email">${email}</div>
+                                <div class="status">✅ Oturum açık</div>
                             </div>
                         </div>
+                        <div class="oauth-actions">
+                            <button class="btn-allow" onclick="allowAccess()">✅ İzin Ver</button>
+                            <button class="btn-deny" onclick="denyAccess()">❌ Reddet</button>
+                        </div>
+                        <div class="oauth-footer">
+                            <a href="#">Gizlilik</a> · <a href="#">Kullanım Şartları</a>
+                        </div>
                     </div>
-                </div>
-            `;
-        } else {
-            area.innerHTML = `
-                <div class="auth-buttons">
-                    <button class="btn-login" onclick="openModal()">Giriş Yap</button>
-                    <button class="btn-register" onclick="openModal()">Kaydol</button>
-                </div>
-            `;
+                `;
         }
-    }
 
-    function toggleMenu() {
-        document.getElementById('userMenu')?.classList.toggle('active');
-    }
-    document.addEventListener('click', function(e) {
-        const menu = document.getElementById('userMenu');
-        if (menu && !menu.contains(e.target)) menu.classList.remove('active');
-    });
+        // ============================================
+        // CÜZDAN
+        // ============================================
+        async function getBalance() {
+            if (!currentUser) return 0;
+            try {
+                const doc = await db.collection('users').doc(currentUser.uid).get();
+                return doc.exists ? doc.data().balance || 0 : 0;
+            } catch {
+                return 0;
+            }
+        }
 
-    auth.onAuthStateChanged(async (user) => {
-        currentUser = user;
-        renderNavbar();
-        await renderMain();
-    });
+        async function addBalance(amount) {
+            const current = await getBalance();
+            await db.collection('users').doc(currentUser.uid).update({ balance: current + amount });
+            showToast(amount + ' TL eklendi!');
+            renderMain();
+        }
 
-    window.handleLogin = handleLogin;
-    window.handleRegister = handleRegister;
-    window.logout = logout;
-    window.openModal = openModal;
-    window.allowAccess = allowAccess;
-    window.denyAccess = denyAccess;
-                                                    </div>
-</script>
-                                                        
+        async function withdrawBalance(amount) {
+            const current = await getBalance();
+            if (current < amount) {
+                showToast('Yetersiz bakiye!');
+                return;
+            }
+            await db.collection('users').doc(currentUser.uid).update({ balance: current - amount });
+            showToast(amount + ' TL çekildi.');
+            renderMain();
+        }
+
+        // ============================================
+        // ANA SAYFA
+        // ============================================
+        async function renderMain() {
+            const container = document.getElementById('mainContainer');
+
+            // OAuth isteği + giriş yapmış = onay ekranı
+            if (IS_OAUTH && currentUser) {
+                renderOAuth();
+                return;
+            }
+
+            // OAuth isteği + giriş yapmamış = login
+            if (IS_OAUTH && !currentUser) {
+                container.innerHTML = `
+                        <div class="welcome-card">
+                            <h1>🔐 Giriş Yap</h1>
+                            <p>"${CLIENT_ID}" uygulamasına izin vermek için giriş yap.</p>
+                        </div>
+                        <div style="text-align:center; padding:40px;">
+                            <button class="btn-login" onclick="openModal()">Giriş Yap / Kaydol</button>
+                        </div>
+                    `;
+                return;
+            }
+
+            // Normal dashboard - giriş yapmamış
+            if (!currentUser) {
+                container.innerHTML = `
+                        <div class="welcome-card">
+                            <h1>BLI Hesabına Hoşgeldin</h1>
+                            <p>Giriş yaparak hesabını yönet.</p>
+                        </div>
+                        <div style="text-align:center; padding:60px;">
+                            <button class="btn-login" onclick="openModal()">Giriş Yap / Kaydol</button>
+                        </div>
+                    `;
+                return;
+            }
+
+            // Normal dashboard - giriş yapmış
+            const balance = await getBalance();
+            container.innerHTML = `
+                    <div class="welcome-card">
+                        <h1>Merhaba, ${currentUser.displayName?.split(' ')[0] || 'Kullanıcı'} 👋</h1>
+                        <p>Hesabını yönet.</p>
+                    </div>
+                    <div class="wallet-card">
+                        <h3><i class="fa-regular fa-credit-card"></i> Cüzdanım</h3>
+                        <div class="wallet-amount">${balance} TL</div>
+                        <div class="balance-actions">
+                            <button class="btn-wallet" onclick="showAdd()">Bakiye Yükle</button>
+                            <button class="btn-wallet" onclick="showWithdraw()">Bakiye Çek</button>
+                        </div>
+                    </div>
+                `;
+        }
+
+        function showAdd() {
+            const amount = prompt('Yüklenecek tutar:');
+            if (amount && !isNaN(amount) && Number(amount) > 0) {
+                addBalance(Number(amount));
+            }
+        }
+
+        function showWithdraw() {
+            const amount = prompt('Çekilecek tutar:');
+            if (amount && !isNaN(amount) && Number(amount) > 0) {
+                withdrawBalance(Number(amount));
+            }
+        }
+
+        // ============================================
+        // NAVBAR
+        // ============================================
+        function renderNavbar() {
+            const area = document.getElementById('navRightArea');
+            if (currentUser) {
+                const name = currentUser.displayName || currentUser.email?.split('@')[0] || 'Kullanıcı';
+                const initial = name.charAt(0).toUpperCase();
+                area.innerHTML = `
+                        <div class="user-menu" id="userMenu">
+                            <div class="user-trigger" onclick="toggleMenu()">
+                                <div class="user-avatar">${initial}</div>
+                                <span class="user-name">${name}</span>
+                                <i class="fa-solid fa-chevron-down user-chevron"></i>
+                            </div>
+                            <div class="user-dropdown">
+                                <div class="dropdown-header">
+                                    <h4>${name}</h4>
+                                    <p>${currentUser.email}</p>
+                                </div>
+                                <div class="dropdown-items">
+                                    <div class="dropdown-item" onclick="location.reload()">
+                                        <i class="fa-regular fa-user"></i> Hesabım
+                                    </div>
+                                    <div class="dropdown-divider"></div>
+                                    <div class="dropdown-item logout-item" onclick="logout()">
+                                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Çıkış Yap
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+            } else {
+                area.innerHTML = `
+                        <div class="auth-buttons">
+                            <button class="btn-login" onclick="openModal()">Giriş Yap</button>
+                            <button class="btn-register" onclick="openModal()">Kaydol</button>
+                        </div>
+                    `;
+            }
+        }
+
+        function toggleMenu() {
+            document.getElementById('userMenu')?.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            if (menu && !menu.contains(e.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // ============================================
+        // AUTH STATE DEĞİŞİNCE
+        // ============================================
+        auth.onAuthStateChanged(async (user) => {
+            currentUser = user;
+            renderNavbar();
+            await renderMain();
+        });
+
+        // ============================================
+        // GLOBAL FONKSİYONLAR (HTML onclick için)
+        // ============================================
+        window.handleLogin = handleLogin;
+        window.handleRegister = handleRegister;
+        window.logout = logout;
+        window.openModal = openModal;
+        window.allowAccess = allowAccess;
+        window.denyAccess = denyAccess;
+        window.showAdd = showAdd;
+        window.showWithdraw = showWithdraw;
+    </script>
+
 </body>
     </html>
