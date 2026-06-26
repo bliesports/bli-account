@@ -521,8 +521,9 @@
         </div>
     </div>
 </div>
-
 <script>
+
+    
     // ============================================
     // FIREBASE
     // ============================================
@@ -540,34 +541,30 @@
     let currentUser = null;
 
     // ============================================
-    // URL PARAMETRELERİ
+    // URL'DEN GELEN PARAMETRELER
     // ============================================
-    const params = new URLSearchParams(window.location.search);
-    const clientId = params.get('client_id');
-    const redirectUri = params.get('redirect_uri');
-    const state = params.get('state');
-    const isOAuth = clientId && redirectUri;
+    const urlParams = new URLSearchParams(window.location.search);
+    const CLIENT_ID = urlParams.get('client_id');
+    const REDIRECT_URI = urlParams.get('redirect_uri');
+    const STATE = urlParams.get('state');
+    const IS_OAUTH = CLIENT_ID && REDIRECT_URI;
 
     // ============================================
-    // TOAST
+    // TOAST MESAJI
     // ============================================
     function showToast(msg) {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.textContent = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 2500);
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.innerText = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 2500);
     }
 
     // ============================================
     // MODAL
     // ============================================
-    function openModal() {
-        document.getElementById('authModal').classList.add('active');
-    }
-    function closeModal() {
-        document.getElementById('authModal').classList.remove('active');
-    }
+    function openModal() { document.getElementById('authModal').classList.add('active'); }
+    function closeModal() { document.getElementById('authModal').classList.remove('active'); }
     window.switchToRegister = function() {
         document.getElementById('loginFormContent').style.display = 'none';
         document.getElementById('registerFormContent').style.display = 'block';
@@ -588,39 +585,24 @@
             showToast('Giriş başarılı!');
             closeModal();
             window.location.reload();
-        } catch(e) {
-            showToast('Hata: ' + e.message);
-        }
+        } catch (e) { showToast('Hata: ' + e.message); }
     }
 
     async function handleRegister() {
         const name = document.getElementById('regName').value;
         const email = document.getElementById('regEmail').value;
         const pass = document.getElementById('regPassword').value;
-        if (!name || !email || !pass) {
-            showToast('Tüm alanları doldur!');
-            return;
-        }
+        if (!name || !email || !pass) { showToast('Tüm alanları doldur!'); return; }
         try {
             const cred = await auth.createUserWithEmailAndPassword(email, pass);
             await cred.user.updateProfile({ displayName: name });
-            await db.collection('users').doc(cred.user.uid).set({
-                name: name,
-                email: email,
-                balance: 0,
-                createdAt: new Date()
-            });
+            await db.collection('users').doc(cred.user.uid).set({ name, email, balance: 0, createdAt: new Date() });
             showToast('Kayıt başarılı!');
             closeModal();
             window.location.reload();
-        } catch(e) {
-            showToast('Hata: ' + e.message);
-        }
+        } catch (e) { showToast('Hata: ' + e.message); }
     }
 
-    // ============================================
-    // ÇIKIŞ
-    // ============================================
     async function logout() {
         await auth.signOut();
         showToast('Çıkış yapıldı.');
@@ -628,45 +610,53 @@
     }
 
     // ============================================
-    // ONAY - İZİN VER
+    // **** İŞTE ASIL ONAY FONKSİYONU (DÜZGÜN ÇALIŞAN) ****
     // ============================================
     async function allowAccess() {
         if (!currentUser) {
-            showToast('Lütfen giriş yapın.');
+            showToast('Lütfen önce giriş yapın.');
             return;
         }
 
-        // Kod oluştur
-        const code = 'BLI_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+        // 1. Benzersiz Kod Oluştur
+        const code = 'BLI_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
 
         try {
-            // Firestore'a kaydet
+            // 2. Kodu Firestore'a Kaydet (Token doğrulama için)
             await db.collection('oauth_codes').doc(code).set({
                 userId: currentUser.uid,
-                clientId: clientId,
+                clientId: CLIENT_ID,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                used: false,
                 userEmail: currentUser.email,
                 userName: currentUser.displayName || 'Kullanıcı'
             });
 
-            // Yönlendirme URL'si
-            let url = redirectUri;
-            if (url.includes('?')) {
-                url += '&code=' + encodeURIComponent(code);
+            // 3. Yönlendirme URL'sini Oluştur
+            let targetUrl = REDIRECT_URI;
+            
+            // Eğer URL'de zaten '?' varsa '&' ile yoksa '?' ile ekle
+            if (targetUrl.includes('?')) {
+                targetUrl += '&code=' + encodeURIComponent(code);
             } else {
-                url += '?code=' + encodeURIComponent(code);
+                targetUrl += '?code=' + encodeURIComponent(code);
             }
-            if (state) {
-                url += '&state=' + encodeURIComponent(state);
+            
+            // State varsa onu da ekle
+            if (STATE) {
+                targetUrl += '&state=' + encodeURIComponent(STATE);
             }
 
-            console.log('YÖNLENDİRME:', url);
-            window.location.href = url;
+            // 4. Konsola Yaz (Hata Ayıklama)
+            console.log('✅ ONAY BAŞARILI! YÖNLENDİRİLİYOR...');
+            console.log('📤 HEDEF URL:', targetUrl);
+            console.log('🔑 OLUŞTURULAN KOD:', code);
 
-        } catch(error) {
-            console.error('HATA:', error);
-            showToast('Hata: ' + error.message);
+            // 5. YÖNLENDİR
+            window.location.href = targetUrl;
+
+        } catch (error) {
+            console.error('❌ FIREBASE HATASI:', error);
+            showToast('Bir hata oluştu: ' + error.message);
         }
     }
 
@@ -674,20 +664,20 @@
     // ONAY - REDDET
     // ============================================
     function denyAccess() {
-        let url = redirectUri;
-        if (url.includes('?')) {
-            url += '&error=access_denied';
+        let targetUrl = REDIRECT_URI;
+        if (targetUrl.includes('?')) {
+            targetUrl += '&error=access_denied';
         } else {
-            url += '?error=access_denied';
+            targetUrl += '?error=access_denied';
         }
-        if (state) {
-            url += '&state=' + encodeURIComponent(state);
-        }
-        window.location.href = url;
+        if (STATE) targetUrl += '&state=' + encodeURIComponent(STATE);
+        
+        console.log('❌ REDDEDİLDİ, YÖNLENDİRİLİYOR:', targetUrl);
+        window.location.href = targetUrl;
     }
 
     // ============================================
-    // ONAY EKRANI
+    // ONAY EKRANINI RENDER ET
     // ============================================
     function renderOAuth() {
         const container = document.getElementById('mainContainer');
@@ -701,19 +691,16 @@
                     <img src="ChatGPT Image 4 May 2026 17_50_07.png" alt="BLI">
                     <h2>BLI <span>ESPORTS</span></h2>
                 </div>
-
                 <div class="oauth-app">
                     <span class="app-icon">🎮</span>
-                    <div class="app-name">${clientId}</div>
+                    <div class="app-name">${CLIENT_ID}</div>
                     <div class="app-desc">hesabınıza erişmek istiyor</div>
                 </div>
-
                 <div class="oauth-permissions">
                     <div class="title">🔓 Gönderilecek bilgiler</div>
                     <div class="item">E-posta adresiniz</div>
                     <div class="item">Kullanıcı adınız</div>
                 </div>
-
                 <div class="oauth-user">
                     <div class="avatar">${initial}</div>
                     <div class="info">
@@ -722,12 +709,10 @@
                         <div class="status">✅ Oturum açık</div>
                     </div>
                 </div>
-
                 <div class="oauth-actions">
                     <button class="btn-allow" onclick="allowAccess()">✅ İzin Ver</button>
                     <button class="btn-deny" onclick="denyAccess()">❌ Reddet</button>
                 </div>
-
                 <div class="oauth-footer">
                     <a href="#">Gizlilik</a> · <a href="#">Kullanım Şartları</a>
                 </div>
@@ -736,54 +721,28 @@
     }
 
     // ============================================
-    // CÜZDAN
+    // CÜZDAN & ANA SAYFA RENDER
     // ============================================
     async function getBalance() {
         if (!currentUser) return 0;
         try {
             const doc = await db.collection('users').doc(currentUser.uid).get();
             return doc.exists ? doc.data().balance || 0 : 0;
-        } catch {
-            return 0;
-        }
+        } catch { return 0; }
     }
 
-    async function addBalance(amount) {
-        const current = await getBalance();
-        await db.collection('users').doc(currentUser.uid).update({ balance: current + amount });
-        showToast(amount + ' TL eklendi!');
-        renderMain();
-    }
-
-    async function withdrawBalance(amount) {
-        const current = await getBalance();
-        if (current < amount) {
-            showToast('Yetersiz bakiye!');
-            return;
-        }
-        await db.collection('users').doc(currentUser.uid).update({ balance: current - amount });
-        showToast(amount + ' TL çekildi.');
-        renderMain();
-    }
-
-    // ============================================
-    // ANA SAYFA
-    // ============================================
     async function renderMain() {
         const container = document.getElementById('mainContainer');
 
-        // OAuth isteği + giriş yapmış = onay ekranı
-        if (isOAuth && currentUser) {
+        if (IS_OAUTH && currentUser) {
             renderOAuth();
             return;
         }
-
-        // OAuth isteği + giriş yapmamış = login
-        if (isOAuth && !currentUser) {
+        if (IS_OAUTH && !currentUser) {
             container.innerHTML = `
                 <div class="welcome-card">
                     <h1>🔐 Giriş Yap</h1>
-                    <p>"${clientId}" uygulamasına izin vermek için giriş yap.</p>
+                    <p>"${CLIENT_ID}" uygulamasına izin vermek için giriş yap.</p>
                 </div>
                 <div style="text-align:center; padding:40px;">
                     <button class="btn-login" onclick="openModal()">Giriş Yap / Kaydol</button>
@@ -791,8 +750,6 @@
             `;
             return;
         }
-
-        // Normal dashboard
         if (!currentUser) {
             container.innerHTML = `
                 <div class="welcome-card">
@@ -807,13 +764,11 @@
         }
 
         const balance = await getBalance();
-
         container.innerHTML = `
             <div class="welcome-card">
                 <h1>Merhaba, ${currentUser.displayName?.split(' ')[0] || 'Kullanıcı'} 👋</h1>
                 <p>Hesabını yönet.</p>
             </div>
-
             <div class="wallet-card">
                 <h3><i class="fa-regular fa-credit-card"></i> Cüzdanım</h3>
                 <div class="wallet-amount">${balance} TL</div>
@@ -823,20 +778,6 @@
                 </div>
             </div>
         `;
-    }
-
-    function showAdd() {
-        const amount = prompt('Yüklenecek tutar:');
-        if (amount && !isNaN(amount) && Number(amount) > 0) {
-            addBalance(Number(amount));
-        }
-    }
-
-    function showWithdraw() {
-        const amount = prompt('Çekilecek tutar:');
-        if (amount && !isNaN(amount) && Number(amount) > 0) {
-            withdrawBalance(Number(amount));
-        }
     }
 
     // ============================================
@@ -884,34 +825,25 @@
     function toggleMenu() {
         document.getElementById('userMenu')?.classList.toggle('active');
     }
-
     document.addEventListener('click', function(e) {
         const menu = document.getElementById('userMenu');
-        if (menu && !menu.contains(e.target)) {
-            menu.classList.remove('active');
-        }
+        if (menu && !menu.contains(e.target)) menu.classList.remove('active');
     });
 
-    // ============================================
-    // AUTH STATE
-    // ============================================
     auth.onAuthStateChanged(async (user) => {
         currentUser = user;
         renderNavbar();
         await renderMain();
     });
 
-    // ============================================
-    // GLOBAL
-    // ============================================
     window.handleLogin = handleLogin;
     window.handleRegister = handleRegister;
     window.logout = logout;
     window.openModal = openModal;
     window.allowAccess = allowAccess;
     window.denyAccess = denyAccess;
-    window.showAdd = showAdd;
-    window.showWithdraw = showWithdraw;
-</script>
+                                                    </div>
+    <script>
+                                                        
 </body>
     </html>
