@@ -538,15 +538,14 @@
     const db = firebase.firestore();
 
     let currentUser = null;
-    let currentSection = 'dashboard';
 
     // ============================================
-    // OAuth PARAMETRELERİ
+    // URL PARAMETRELERİ
     // ============================================
-    const urlParams = new URLSearchParams(window.location.search);
-    const clientId = urlParams.get('client_id');
-    const redirectUri = urlParams.get('redirect_uri');
-    const state = urlParams.get('state');
+    const params = new URLSearchParams(window.location.search);
+    const clientId = params.get('client_id');
+    const redirectUri = params.get('redirect_uri');
+    const state = params.get('state');
     const isOAuth = clientId && redirectUri;
 
     // ============================================
@@ -555,7 +554,7 @@
     function showToast(msg) {
         const toast = document.createElement('div');
         toast.className = 'toast';
-        toast.innerText = msg;
+        toast.textContent = msg;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 2500);
     }
@@ -563,10 +562,10 @@
     // ============================================
     // MODAL
     // ============================================
-    function openAuthModal() {
+    function openModal() {
         document.getElementById('authModal').classList.add('active');
     }
-    function closeAuthModal() {
+    function closeModal() {
         document.getElementById('authModal').classList.remove('active');
     }
     window.switchToRegister = function() {
@@ -586,11 +585,11 @@
         const pass = document.getElementById('loginPassword').value;
         try {
             await auth.signInWithEmailAndPassword(email, pass);
-            showToast("Giriş başarılı!");
-            closeAuthModal();
+            showToast('Giriş başarılı!');
+            closeModal();
             window.location.reload();
         } catch(e) {
-            showToast("Hata: " + e.message);
+            showToast('Hata: ' + e.message);
         }
     }
 
@@ -598,8 +597,8 @@
         const name = document.getElementById('regName').value;
         const email = document.getElementById('regEmail').value;
         const pass = document.getElementById('regPassword').value;
-        if(!name || !email || !pass) {
-            showToast("Tüm alanları doldur!");
+        if (!name || !email || !pass) {
+            showToast('Tüm alanları doldur!');
             return;
         }
         try {
@@ -611,11 +610,11 @@
                 balance: 0,
                 createdAt: new Date()
             });
-            showToast("Kayıt başarılı!");
-            closeAuthModal();
+            showToast('Kayıt başarılı!');
+            closeModal();
             window.location.reload();
         } catch(e) {
-            showToast("Hata: " + e.message);
+            showToast('Hata: ' + e.message);
         }
     }
 
@@ -624,21 +623,22 @@
     // ============================================
     async function logout() {
         await auth.signOut();
-        showToast("Çıkış yapıldı.");
+        showToast('Çıkış yapıldı.');
         window.location.href = '/';
     }
 
     // ============================================
-    // OAuth İZİN VER
+    // ONAY - İZİN VER
     // ============================================
-    async function handleOAuthApprove() {
+    async function allowAccess() {
         if (!currentUser) {
-            showToast("Lütfen giriş yapın.");
+            showToast('Lütfen giriş yapın.');
             return;
         }
 
-        const code = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-        
+        // Kod oluştur
+        const code = 'BLI_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+
         try {
             // Firestore'a kaydet
             await db.collection('oauth_codes').doc(code).set({
@@ -650,32 +650,38 @@
                 userName: currentUser.displayName || 'Kullanıcı'
             });
 
-            // Yönlendir
+            // Yönlendirme URL'si
             let url = redirectUri;
             if (url.includes('?')) {
-                url += '&code=' + code + '&state=' + (state || '');
+                url += '&code=' + encodeURIComponent(code);
             } else {
-                url += '?code=' + code + '&state=' + (state || '');
+                url += '?code=' + encodeURIComponent(code);
+            }
+            if (state) {
+                url += '&state=' + encodeURIComponent(state);
             }
 
-            console.log('YÖNLENDİRİLİYOR:', url);
+            console.log('YÖNLENDİRME:', url);
             window.location.href = url;
 
         } catch(error) {
             console.error('HATA:', error);
-            showToast('Bir hata oluştu: ' + error.message);
+            showToast('Hata: ' + error.message);
         }
     }
 
     // ============================================
-    // OAuth REDDET
+    // ONAY - REDDET
     // ============================================
-    function handleOAuthDeny() {
+    function denyAccess() {
         let url = redirectUri;
         if (url.includes('?')) {
-            url += '&error=access_denied&state=' + (state || '');
+            url += '&error=access_denied';
         } else {
-            url += '?error=access_denied&state=' + (state || '');
+            url += '?error=access_denied';
+        }
+        if (state) {
+            url += '&state=' + encodeURIComponent(state);
         }
         window.location.href = url;
     }
@@ -718,12 +724,12 @@
                 </div>
 
                 <div class="oauth-actions">
-                    <button class="btn-allow" onclick="handleOAuthApprove()">✅ İzin Ver</button>
-                    <button class="btn-deny" onclick="handleOAuthDeny()">❌ Reddet</button>
+                    <button class="btn-allow" onclick="allowAccess()">✅ İzin Ver</button>
+                    <button class="btn-deny" onclick="denyAccess()">❌ Reddet</button>
                 </div>
 
                 <div class="oauth-footer">
-                    <a href="/privacy">Gizlilik</a> · <a href="/terms">Kullanım Şartları</a>
+                    <a href="#">Gizlilik</a> · <a href="#">Kullanım Şartları</a>
                 </div>
             </div>
         `;
@@ -761,7 +767,7 @@
     }
 
     // ============================================
-    // ANA İÇERİK
+    // ANA SAYFA
     // ============================================
     async function renderMain() {
         const container = document.getElementById('mainContainer');
@@ -780,7 +786,7 @@
                     <p>"${clientId}" uygulamasına izin vermek için giriş yap.</p>
                 </div>
                 <div style="text-align:center; padding:40px;">
-                    <button class="btn-login" onclick="openAuthModal()">Giriş Yap / Kaydol</button>
+                    <button class="btn-login" onclick="openModal()">Giriş Yap / Kaydol</button>
                 </div>
             `;
             return;
@@ -794,7 +800,7 @@
                     <p>Giriş yaparak hesabını yönet.</p>
                 </div>
                 <div style="text-align:center; padding:60px;">
-                    <button class="btn-login" onclick="openAuthModal()">Giriş Yap / Kaydol</button>
+                    <button class="btn-login" onclick="openModal()">Giriş Yap / Kaydol</button>
                 </div>
             `;
             return;
@@ -854,7 +860,7 @@
                             <p>${currentUser.email}</p>
                         </div>
                         <div class="dropdown-items">
-                            <div class="dropdown-item" onclick="changeSection('dashboard')">
+                            <div class="dropdown-item" onclick="location.reload()">
                                 <i class="fa-regular fa-user"></i> Hesabım
                             </div>
                             <div class="dropdown-divider"></div>
@@ -868,8 +874,8 @@
         } else {
             area.innerHTML = `
                 <div class="auth-buttons">
-                    <button class="btn-login" onclick="openAuthModal()">Giriş Yap</button>
-                    <button class="btn-register" onclick="openAuthModal()">Kaydol</button>
+                    <button class="btn-login" onclick="openModal()">Giriş Yap</button>
+                    <button class="btn-register" onclick="openModal()">Kaydol</button>
                 </div>
             `;
         }
@@ -877,12 +883,6 @@
 
     function toggleMenu() {
         document.getElementById('userMenu')?.classList.toggle('active');
-    }
-
-    function changeSection(section) {
-        currentSection = section;
-        document.querySelector('.user-menu')?.classList.remove('active');
-        renderMain();
     }
 
     document.addEventListener('click', function(e) {
@@ -907,11 +907,9 @@
     window.handleLogin = handleLogin;
     window.handleRegister = handleRegister;
     window.logout = logout;
-    window.openAuthModal = openAuthModal;
-    window.toggleMenu = toggleMenu;
-    window.changeSection = changeSection;
-    window.handleOAuthApprove = handleOAuthApprove;
-    window.handleOAuthDeny = handleOAuthDeny;
+    window.openModal = openModal;
+    window.allowAccess = allowAccess;
+    window.denyAccess = denyAccess;
     window.showAdd = showAdd;
     window.showWithdraw = showWithdraw;
 </script>
