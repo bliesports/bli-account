@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLI ACCOUNT | Hesabım</title>
+    <title>BLI ACCOUNT</title>
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -29,7 +29,6 @@
             color: #1a1a2e;
         }
 
-        /* Navbar */
         .navbar {
             position: fixed;
             top: 0;
@@ -51,7 +50,6 @@
             cursor: pointer;
         }
 
-        /* Kullanıcı menüsü */
         .user-menu {
             position: relative;
             cursor: pointer;
@@ -165,7 +163,6 @@
             color: #ff3b30;
         }
 
-        /* Butonlar */
         .auth-buttons {
             display: flex;
             gap: 12px;
@@ -196,16 +193,13 @@
             transition: 0.2s;
         }
 
-        /* Ana içerik */
         .main-container {
             max-width: 1280px;
             margin: 100px auto 60px;
             padding: 0 5%;
         }
 
-        /* ======================================== */
         /* ONAY EKRANI */
-        /* ======================================== */
         .oauth-container {
             max-width: 480px;
             margin: 40px auto;
@@ -376,7 +370,6 @@
             text-decoration: none;
         }
 
-        /* Hoşgeldin kartı */
         .welcome-card {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             border-radius: 32px;
@@ -424,7 +417,6 @@
             cursor: pointer;
         }
 
-        /* Modal */
         .modal {
             position: fixed;
             inset: 0;
@@ -496,26 +488,21 @@
     <div class="logo" onclick="location.href='/'">
         <img src="ChatGPT Image 4 May 2026 17_50_07.png" alt="BLI">
     </div>
-    
-    <div id="navRightArea">
-        <!-- Dinamik olarak giriş yapmışsa user-menu, değilse auth-buttons gelecek -->
-    </div>
+    <div id="navRightArea"></div>
 </nav>
 
-<div class="main-container" id="mainContainer">
-    <!-- Dinamik içerik -->
-</div>
+<div class="main-container" id="mainContainer"></div>
 
 <footer>
     <p>© 2026 BLI ESPORTS — Tüm hakları saklıdır.</p>
 </footer>
 
-<!-- Modal (Giriş/Kayıt için) -->
+<!-- Modal -->
 <div class="modal" id="authModal">
     <div class="modal-content">
         <div id="loginFormContent">
             <h3 style="margin-bottom: 20px;">Giriş Yap</h3>
-            <input type="email" id="loginEmail" placeholder="E-posta adresin">
+            <input type="email" id="loginEmail" placeholder="E-posta">
             <input type="password" id="loginPassword" placeholder="Şifre">
             <button class="btn-login" style="width:100%; margin-top:12px;" onclick="handleLogin()">Giriş Yap</button>
             <p style="margin-top: 20px; text-align:center;">
@@ -537,7 +524,7 @@
 
 <script>
     // ============================================
-    // FIREBASE KONFIGÜRASYONU
+    // FIREBASE
     // ============================================
     const firebaseConfig = {
         apiKey: "AIzaSyB0PdRozDzBzSyuuNIRG67xg-W3UJBfJD8",
@@ -557,10 +544,10 @@
     // OAuth PARAMETRELERİ
     // ============================================
     const urlParams = new URLSearchParams(window.location.search);
-    const oauthClientId = urlParams.get('client_id');
-    const oauthRedirectUri = urlParams.get('redirect_uri');
-    const oauthState = urlParams.get('state');
-    const isOAuthRequest = oauthClientId && oauthRedirectUri;
+    const clientId = urlParams.get('client_id');
+    const redirectUri = urlParams.get('redirect_uri');
+    const state = urlParams.get('state');
+    const isOAuth = clientId && redirectUri;
 
     // ============================================
     // TOAST
@@ -574,7 +561,7 @@
     }
 
     // ============================================
-    // MODAL KONTROL
+    // MODAL
     // ============================================
     function openAuthModal() {
         document.getElementById('authModal').classList.add('active');
@@ -624,7 +611,7 @@
                 balance: 0,
                 createdAt: new Date()
             });
-            showToast("Kayıt başarılı! Hoşgeldin.");
+            showToast("Kayıt başarılı!");
             closeAuthModal();
             window.location.reload();
         } catch(e) {
@@ -642,65 +629,65 @@
     }
 
     // ============================================
-    // OAuth ONAY İŞLEMİ (DÜZELTİLDİ)
+    // OAuth İZİN VER
     // ============================================
     async function handleOAuthApprove() {
         if (!currentUser) {
-            showToast("Lütfen önce giriş yapın.");
+            showToast("Lütfen giriş yapın.");
             return;
         }
 
-        // Geçici kod oluştur
         const code = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         
         try {
-            // Kodu Firestore'a kaydet
+            // Firestore'a kaydet
             await db.collection('oauth_codes').doc(code).set({
                 userId: currentUser.uid,
-                clientId: oauthClientId,
+                clientId: clientId,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 used: false,
                 userEmail: currentUser.email,
                 userName: currentUser.displayName || 'Kullanıcı'
             });
 
-            // Yönlendirme URL'ini oluştur
-            let redirectUrl = oauthRedirectUri;
-            
-            // URL'de zaten parametre varsa & ile ekle, yoksa ? ile ekle
-            if (redirectUrl.includes('?')) {
-                redirectUrl += `&code=${code}&state=${oauthState || ''}`;
+            // Yönlendir
+            let url = redirectUri;
+            if (url.includes('?')) {
+                url += '&code=' + code + '&state=' + (state || '');
             } else {
-                redirectUrl += `?code=${code}&state=${oauthState || ''}`;
+                url += '?code=' + code + '&state=' + (state || '');
             }
 
-            console.log('Yönlendiriliyor:', redirectUrl);
-            window.location.href = redirectUrl;
+            console.log('YÖNLENDİRİLİYOR:', url);
+            window.location.href = url;
 
         } catch(error) {
-            console.error('OAuth hatası:', error);
-            showToast('Bir hata oluştu. Tekrar deneyin.');
+            console.error('HATA:', error);
+            showToast('Bir hata oluştu: ' + error.message);
         }
     }
 
+    // ============================================
+    // OAuth REDDET
+    // ============================================
     function handleOAuthDeny() {
-        let redirectUrl = oauthRedirectUri;
-        if (redirectUrl.includes('?')) {
-            redirectUrl += `&error=access_denied&state=${oauthState || ''}`;
+        let url = redirectUri;
+        if (url.includes('?')) {
+            url += '&error=access_denied&state=' + (state || '');
         } else {
-            redirectUrl += `?error=access_denied&state=${oauthState || ''}`;
+            url += '?error=access_denied&state=' + (state || '');
         }
-        window.location.href = redirectUrl;
+        window.location.href = url;
     }
 
     // ============================================
-    // OAuth ONAY EKRANI
+    // ONAY EKRANI
     // ============================================
-    function renderOAuthApproval() {
+    function renderOAuth() {
         const container = document.getElementById('mainContainer');
-        const userName = currentUser?.displayName || 'Kullanıcı';
-        const userEmail = currentUser?.email || '';
-        const initial = userName.charAt(0).toUpperCase();
+        const name = currentUser?.displayName || 'Kullanıcı';
+        const email = currentUser?.email || '';
+        const initial = name.charAt(0).toUpperCase();
 
         container.innerHTML = `
             <div class="oauth-container">
@@ -711,107 +698,88 @@
 
                 <div class="oauth-app">
                     <span class="app-icon">🎮</span>
-                    <div class="app-name">${escapeHtml(oauthClientId)}</div>
-                    <div class="app-desc">uygulaması hesabınıza erişmek istiyor</div>
+                    <div class="app-name">${clientId}</div>
+                    <div class="app-desc">hesabınıza erişmek istiyor</div>
                 </div>
 
                 <div class="oauth-permissions">
-                    <div class="title">🔓 Bu uygulamaya gönderilecek bilgiler</div>
+                    <div class="title">🔓 Gönderilecek bilgiler</div>
                     <div class="item">E-posta adresiniz</div>
                     <div class="item">Kullanıcı adınız</div>
-                    <div class="item">Profil resminiz</div>
                 </div>
 
                 <div class="oauth-user">
                     <div class="avatar">${initial}</div>
                     <div class="info">
-                        <div class="name">${escapeHtml(userName)}</div>
-                        <div class="email">${escapeHtml(userEmail)}</div>
+                        <div class="name">${name}</div>
+                        <div class="email">${email}</div>
                         <div class="status">✅ Oturum açık</div>
                     </div>
                 </div>
 
                 <div class="oauth-actions">
-                    <button class="btn-allow" onclick="handleOAuthApprove()">
-                        ✅ İzin Ver
-                    </button>
-                    <button class="btn-deny" onclick="handleOAuthDeny()">
-                        ❌ Reddet
-                    </button>
+                    <button class="btn-allow" onclick="handleOAuthApprove()">✅ İzin Ver</button>
+                    <button class="btn-deny" onclick="handleOAuthDeny()">❌ Reddet</button>
                 </div>
 
                 <div class="oauth-footer">
-                    <a href="/privacy">Gizlilik</a> · 
-                    <a href="/terms">Kullanım Şartları</a>
+                    <a href="/privacy">Gizlilik</a> · <a href="/terms">Kullanım Şartları</a>
                 </div>
             </div>
         `;
     }
 
     // ============================================
-    // YARDIMCI FONKSİYONLAR
-    // ============================================
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    // ============================================
     // CÜZDAN
     // ============================================
     async function getBalance() {
-        if(!currentUser) return 0;
+        if (!currentUser) return 0;
         try {
             const doc = await db.collection('users').doc(currentUser.uid).get();
-            if(doc.exists) return doc.data().balance || 0;
-            return 0;
-        } catch(e) {
+            return doc.exists ? doc.data().balance || 0 : 0;
+        } catch {
             return 0;
         }
     }
 
     async function addBalance(amount) {
         const current = await getBalance();
-        const newBalance = current + amount;
-        await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
-        showToast(`${amount} TL bakiye eklendi!`);
-        renderMainContent();
+        await db.collection('users').doc(currentUser.uid).update({ balance: current + amount });
+        showToast(amount + ' TL eklendi!');
+        renderMain();
     }
 
     async function withdrawBalance(amount) {
         const current = await getBalance();
-        if(current < amount) {
-            showToast("Yetersiz bakiye!");
+        if (current < amount) {
+            showToast('Yetersiz bakiye!');
             return;
         }
-        const newBalance = current - amount;
-        await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
-        showToast(`${amount} TL çekildi.`);
-        renderMainContent();
+        await db.collection('users').doc(currentUser.uid).update({ balance: current - amount });
+        showToast(amount + ' TL çekildi.');
+        renderMain();
     }
 
     // ============================================
-    // ANA İÇERİK RENDER
+    // ANA İÇERİK
     // ============================================
-    async function renderMainContent() {
+    async function renderMain() {
         const container = document.getElementById('mainContainer');
-        
-        // OAuth isteği varsa ve kullanıcı giriş yapmışsa onay ekranını göster
-        if (isOAuthRequest && currentUser) {
-            renderOAuthApproval();
+
+        // OAuth isteği + giriş yapmış = onay ekranı
+        if (isOAuth && currentUser) {
+            renderOAuth();
             return;
         }
 
-        // OAuth isteği varsa ama kullanıcı giriş yapmamışsa login göster
-        if (isOAuthRequest && !currentUser) {
+        // OAuth isteği + giriş yapmamış = login
+        if (isOAuth && !currentUser) {
             container.innerHTML = `
                 <div class="welcome-card">
                     <h1>🔐 Giriş Yap</h1>
-                    <p>"${escapeHtml(oauthClientId)}" uygulamasına izin vermek için önce giriş yapmalısın.</p>
+                    <p>"${clientId}" uygulamasına izin vermek için giriş yap.</p>
                 </div>
-                <div style="text-align: center; padding: 40px;">
+                <div style="text-align:center; padding:40px;">
                     <button class="btn-login" onclick="openAuthModal()">Giriş Yap / Kaydol</button>
                 </div>
             `;
@@ -819,13 +787,13 @@
         }
 
         // Normal dashboard
-        if(!currentUser) {
+        if (!currentUser) {
             container.innerHTML = `
                 <div class="welcome-card">
                     <h1>BLI Hesabına Hoşgeldin</h1>
-                    <p>Giriş yaparak siparişlerini takip et, cüzdanını yönet ve özel fırsatları kaçırma.</p>
+                    <p>Giriş yaparak hesabını yönet.</p>
                 </div>
-                <div style="text-align: center; padding: 60px;">
+                <div style="text-align:center; padding:60px;">
                     <button class="btn-login" onclick="openAuthModal()">Giriş Yap / Kaydol</button>
                 </div>
             `;
@@ -836,63 +804,46 @@
 
         container.innerHTML = `
             <div class="welcome-card">
-                <h1>Merhaba, ${currentUser.displayName?.split(' ')[0] || 'BLI Kullanıcısı'} 👋</h1>
-                <p>Hesabını yönet, siparişlerini takip et ve avantajları keşfet.</p>
+                <h1>Merhaba, ${currentUser.displayName?.split(' ')[0] || 'Kullanıcı'} 👋</h1>
+                <p>Hesabını yönet.</p>
             </div>
 
-            <div style="display: ${currentSection === 'dashboard' ? 'block' : 'none'}" id="dashboardSection">
-                <div class="wallet-card">
-                    <h3><i class="fa-regular fa-credit-card"></i> Cüzdanım</h3>
-                    <div class="wallet-amount">${balance} TL</div>
-                    <div class="balance-actions">
-                        <button class="btn-wallet" onclick="showAddBalanceModal()">Bakiye Yükle</button>
-                        <button class="btn-wallet" onclick="showWithdrawModal()">Bakiye Çek</button>
-                    </div>
+            <div class="wallet-card">
+                <h3><i class="fa-regular fa-credit-card"></i> Cüzdanım</h3>
+                <div class="wallet-amount">${balance} TL</div>
+                <div class="balance-actions">
+                    <button class="btn-wallet" onclick="showAdd()">Bakiye Yükle</button>
+                    <button class="btn-wallet" onclick="showWithdraw()">Bakiye Çek</button>
                 </div>
             </div>
         `;
     }
 
-    // ============================================
-    // BAKİYE İŞLEMLERİ
-    // ============================================
-    function showAddBalanceModal() {
-        const amount = prompt("Yüklenecek tutar (TL):");
-        if(amount && !isNaN(amount) && Number(amount) > 0) {
+    function showAdd() {
+        const amount = prompt('Yüklenecek tutar:');
+        if (amount && !isNaN(amount) && Number(amount) > 0) {
             addBalance(Number(amount));
-        } else {
-            showToast("Geçerli bir tutar girin");
         }
     }
-    function showWithdrawModal() {
-        const amount = prompt("Çekilecek tutar (TL):");
-        if(amount && !isNaN(amount) && Number(amount) > 0) {
+
+    function showWithdraw() {
+        const amount = prompt('Çekilecek tutar:');
+        if (amount && !isNaN(amount) && Number(amount) > 0) {
             withdrawBalance(Number(amount));
-        } else {
-            showToast("Geçerli bir tutar girin");
         }
     }
 
     // ============================================
-    // BÖLÜM DEĞİŞTİRME
-    // ============================================
-    function changeSection(section) {
-        currentSection = section;
-        document.querySelector('.user-menu')?.classList.remove('active');
-        renderMainContent();
-    }
-
-    // ============================================
-    // NAVBAR RENDER
+    // NAVBAR
     // ============================================
     function renderNavbar() {
-        const navRight = document.getElementById('navRightArea');
-        if(currentUser) {
+        const area = document.getElementById('navRightArea');
+        if (currentUser) {
             const name = currentUser.displayName || currentUser.email?.split('@')[0] || 'Kullanıcı';
             const initial = name.charAt(0).toUpperCase();
-            navRight.innerHTML = `
+            area.innerHTML = `
                 <div class="user-menu" id="userMenu">
-                    <div class="user-trigger" onclick="toggleUserMenu()">
+                    <div class="user-trigger" onclick="toggleMenu()">
                         <div class="user-avatar">${initial}</div>
                         <span class="user-name">${name}</span>
                         <i class="fa-solid fa-chevron-down user-chevron"></i>
@@ -915,7 +866,7 @@
                 </div>
             `;
         } else {
-            navRight.innerHTML = `
+            area.innerHTML = `
                 <div class="auth-buttons">
                     <button class="btn-login" onclick="openAuthModal()">Giriş Yap</button>
                     <button class="btn-register" onclick="openAuthModal()">Kaydol</button>
@@ -924,45 +875,45 @@
         }
     }
 
-    // ============================================
-    // DROPDOWN KONTROL
-    // ============================================
-    function toggleUserMenu() {
-        const menu = document.getElementById('userMenu');
-        if(menu) menu.classList.toggle('active');
+    function toggleMenu() {
+        document.getElementById('userMenu')?.classList.toggle('active');
+    }
+
+    function changeSection(section) {
+        currentSection = section;
+        document.querySelector('.user-menu')?.classList.remove('active');
+        renderMain();
     }
 
     document.addEventListener('click', function(e) {
-        const userMenu = document.getElementById('userMenu');
-        if(userMenu && !userMenu.contains(e.target)) {
-            userMenu.classList.remove('active');
+        const menu = document.getElementById('userMenu');
+        if (menu && !menu.contains(e.target)) {
+            menu.classList.remove('active');
         }
     });
 
     // ============================================
-    // AUTH STATE DEĞİŞİKLİĞİ
+    // AUTH STATE
     // ============================================
     auth.onAuthStateChanged(async (user) => {
         currentUser = user;
         renderNavbar();
-        await renderMainContent();
+        await renderMain();
     });
 
     // ============================================
-    // GLOBAL FONKSİYONLAR
+    // GLOBAL
     // ============================================
     window.handleLogin = handleLogin;
     window.handleRegister = handleRegister;
     window.logout = logout;
     window.openAuthModal = openAuthModal;
-    window.toggleUserMenu = toggleUserMenu;
+    window.toggleMenu = toggleMenu;
     window.changeSection = changeSection;
-    window.showAddBalanceModal = showAddBalanceModal;
-    window.showWithdrawModal = showWithdrawModal;
-    window.addBalance = addBalance;
-    window.withdrawBalance = withdrawBalance;
     window.handleOAuthApprove = handleOAuthApprove;
     window.handleOAuthDeny = handleOAuthDeny;
+    window.showAdd = showAdd;
+    window.showWithdraw = showWithdraw;
 </script>
 </body>
     </html>
