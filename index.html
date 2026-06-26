@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BLI ACCOUNT | Hesabım</title>
 
     <!-- Firebase -->
@@ -10,8 +10,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     
-    <!-- Font Awesome & Google Fonts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <link rel="icon" type="image/png" href="ChatGPT Image 4 May 2026 17_50_07.png">
@@ -204,7 +204,7 @@
         }
 
         /* ======================================== */
-        /* ===== ONAY EKRANI ===== */
+        /* ONAY EKRANI */
         /* ======================================== */
         .oauth-container {
             max-width: 480px;
@@ -394,63 +394,6 @@
             opacity: 0.8;
         }
 
-        .content-grid {
-            display: none;
-        }
-
-        .content-grid.active {
-            display: block;
-        }
-
-        /* Sipariş kartları */
-        .orders-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .order-card {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            border: 1px solid #eef2f6;
-            transition: 0.2s;
-        }
-
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        .order-id {
-            font-weight: 700;
-            font-family: monospace;
-        }
-
-        .order-status {
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-
-        .status-delivered {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .status-shipped {
-            background: #fff3e0;
-            color: #ed6c02;
-        }
-
-        .status-pending {
-            background: #ffebee;
-            color: #c62828;
-        }
-
         .wallet-card {
             background: white;
             border-radius: 28px;
@@ -479,16 +422,6 @@
             border-radius: 40px;
             font-weight: 600;
             cursor: pointer;
-        }
-
-        .liked-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-            background: #f8f9fc;
-            border-radius: 16px;
-            margin-bottom: 12px;
         }
 
         /* Modal */
@@ -554,35 +487,6 @@
             margin-top: 60px;
             color: #888;
             font-size: 0.8rem;
-        }
-
-        .oauth-error {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .oauth-error .error-icon {
-            font-size: 60px;
-            display: block;
-            margin-bottom: 20px;
-        }
-        .oauth-error h2 {
-            color: #ff3b30;
-        }
-        .oauth-error .btn-back {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 30px;
-            background: #1a1a2e;
-            color: white;
-            border-radius: 40px;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        /* Aktif bölüm göstergesi */
-        .section-active {
-            background: #f0f2f5;
         }
     </style>
 </head>
@@ -738,7 +642,7 @@
     }
 
     // ============================================
-    // OAuth ONAY İŞLEMİ
+    // OAuth ONAY İŞLEMİ (DÜZELTİLDİ)
     // ============================================
     async function handleOAuthApprove() {
         if (!currentUser) {
@@ -749,26 +653,34 @@
         // Geçici kod oluştur
         const code = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         
-        // Kodu Firestore'a kaydet
-        await db.collection('oauth_codes').doc(code).set({
-            userId: currentUser.uid,
-            clientId: oauthClientId,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            used: false,
-            userEmail: currentUser.email,
-            userName: currentUser.displayName || 'Kullanıcı'
-        });
+        try {
+            // Kodu Firestore'a kaydet
+            await db.collection('oauth_codes').doc(code).set({
+                userId: currentUser.uid,
+                clientId: oauthClientId,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                used: false,
+                userEmail: currentUser.email,
+                userName: currentUser.displayName || 'Kullanıcı'
+            });
 
-        // Yönlendirme URL'ini oluştur
-        let redirectUrl = oauthRedirectUri;
-        if (redirectUrl.includes('?')) {
-            redirectUrl += `&code=${code}&state=${oauthState || ''}`;
-        } else {
-            redirectUrl += `?code=${code}&state=${oauthState || ''}`;
+            // Yönlendirme URL'ini oluştur
+            let redirectUrl = oauthRedirectUri;
+            
+            // URL'de zaten parametre varsa & ile ekle, yoksa ? ile ekle
+            if (redirectUrl.includes('?')) {
+                redirectUrl += `&code=${code}&state=${oauthState || ''}`;
+            } else {
+                redirectUrl += `?code=${code}&state=${oauthState || ''}`;
+            }
+
+            console.log('Yönlendiriliyor:', redirectUrl);
+            window.location.href = redirectUrl;
+
+        } catch(error) {
+            console.error('OAuth hatası:', error);
+            showToast('Bir hata oluştu. Tekrar deneyin.');
         }
-
-        // Kullanıcıyı yönlendir
-        window.location.href = redirectUrl;
     }
 
     function handleOAuthDeny() {
@@ -782,7 +694,7 @@
     }
 
     // ============================================
-    // OAuth ONAY EKRANINI RENDER ET
+    // OAuth ONAY EKRANI
     // ============================================
     function renderOAuthApproval() {
         const container = document.getElementById('mainContainer');
@@ -837,21 +749,6 @@
     }
 
     // ============================================
-    // HATA EKRANI
-    // ============================================
-    function renderOAuthError(message) {
-        const container = document.getElementById('mainContainer');
-        container.innerHTML = `
-            <div class="oauth-error">
-                <span class="error-icon">🚫</span>
-                <h2>Hata</h2>
-                <p style="color:#888;">${escapeHtml(message)}</p>
-                <a href="/" class="btn-back">Ana Sayfaya Dön</a>
-            </div>
-        `;
-    }
-
-    // ============================================
     // YARDIMCI FONKSİYONLAR
     // ============================================
     function escapeHtml(text) {
@@ -859,30 +756,6 @@
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
-    }
-
-    // ============================================
-    // SİPARİŞLER (Demo)
-    // ============================================
-    async function getOrders() {
-        if(!currentUser) return [];
-        try {
-            const snapshot = await db.collection('orders')
-                .where('userId', '==', currentUser.uid)
-                .orderBy('createdAt', 'desc')
-                .get();
-            const orders = [];
-            snapshot.forEach(doc => {
-                orders.push({ id: doc.id, ...doc.data() });
-            });
-            return orders;
-        } catch(e) {
-            // Demo veri döndür
-            return [
-                { id: "BLI-2401", date: "15 Mart 2026", total: 1899, status: "delivered", items: "BLI V1 PRO Mouse" },
-                { id: "BLI-2402", date: "28 Şubat 2026", total: 749, status: "shipped", items: "Elite Jersey V2" }
-            ];
-        }
     }
 
     // ============================================
@@ -917,42 +790,6 @@
         await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
         showToast(`${amount} TL çekildi.`);
         renderMainContent();
-    }
-
-    // ============================================
-    // BEĞENDİKLERİM
-    // ============================================
-    async function getWishlist() {
-        if(!currentUser) return [];
-        try {
-            const doc = await db.collection('users').doc(currentUser.uid).get();
-            if(doc.exists) return doc.data().wishlist || [];
-            return [];
-        } catch(e) {
-            return [];
-        }
-    }
-
-    async function removeFromWishlist(index) {
-        const wishlist = await getWishlist();
-        wishlist.splice(index, 1);
-        await db.collection('users').doc(currentUser.uid).update({ wishlist: wishlist });
-        showToast("Ürün kaldırıldı!");
-        renderMainContent();
-    }
-
-    // ============================================
-    // KUPONLAR
-    // ============================================
-    async function getCoupons() {
-        if(!currentUser) return [];
-        try {
-            const doc = await db.collection('users').doc(currentUser.uid).get();
-            if(doc.exists) return doc.data().coupons || [];
-            return [];
-        } catch(e) {
-            return [];
-        }
     }
 
     // ============================================
@@ -996,65 +833,6 @@
         }
 
         const balance = await getBalance();
-        const orders = await getOrders();
-        const wishlist = await getWishlist();
-        const coupons = await getCoupons();
-
-        let ordersHtml = '<div class="orders-list">';
-        if(orders.length === 0) {
-            ordersHtml += '<p style="text-align:center; padding:40px; color:#888;">Henüz siparişin yok.</p>';
-        } else {
-            orders.forEach(order => {
-                let statusClass = order.status === 'delivered' ? 'status-delivered' : (order.status === 'shipped' ? 'status-shipped' : 'status-pending');
-                let statusText = order.status === 'delivered' ? 'Teslim Edildi' : (order.status === 'shipped' ? 'Kargoda' : 'Hazırlanıyor');
-                ordersHtml += `
-                    <div class="order-card">
-                        <div class="order-header">
-                            <span class="order-id">${order.id}</span>
-                            <span class="order-status ${statusClass}">${statusText}</span>
-                        </div>
-                        <div>${order.items || 'Ürün'}</div>
-                        <div style="display:flex; justify-content:space-between; margin-top:12px;">
-                            <span style="color:#888;">${order.date || 'Tarih yok'}</span>
-                            <span style="font-weight:700;">${order.total || 0} TL</span>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-        ordersHtml += '</div>';
-
-        let wishlistHtml = '<div>';
-        if(wishlist.length === 0) {
-            wishlistHtml += '<p style="text-align:center; padding:40px; color:#888;">Beğendiğin ürün yok.</p>';
-        } else {
-            wishlist.forEach((item, idx) => {
-                wishlistHtml += `
-                    <div class="liked-item">
-                        <div><strong>${item.name || 'Ürün'}</strong><br><span style="font-size:0.8rem;">${item.price || 0} TL</span></div>
-                        <button onclick="removeFromWishlist(${idx})" style="background:none; border:none; color:#ff3b30; cursor:pointer;">
-                            <i class="fa-regular fa-trash-can"></i>
-                        </button>
-                    </div>
-                `;
-            });
-        }
-        wishlistHtml += '</div>';
-
-        let couponsHtml = '<div>';
-        if(coupons.length === 0) {
-            couponsHtml += '<p style="text-align:center; padding:40px; color:#888;">Aktif kuponun yok.</p>';
-        } else {
-            coupons.forEach(coupon => {
-                couponsHtml += `
-                    <div class="order-card">
-                        <strong><i class="fa-regular fa-ticket" style="margin-right: 8px; color:#ff3b30;"></i>${coupon.code || 'Kupon'}</strong> - ${coupon.discount || 0} TL indirim
-                        <div style="font-size:0.7rem; color:#888;">Son kullanım: ${coupon.expiry || 'Belirtilmemiş'}</div>
-                    </div>
-                `;
-            });
-        }
-        couponsHtml += '</div>';
 
         container.innerHTML = `
             <div class="welcome-card">
@@ -1070,30 +848,6 @@
                         <button class="btn-wallet" onclick="showAddBalanceModal()">Bakiye Yükle</button>
                         <button class="btn-wallet" onclick="showWithdrawModal()">Bakiye Çek</button>
                     </div>
-                </div>
-            </div>
-
-            <div style="display: ${currentSection === 'orders' ? 'block' : 'none'}" id="ordersSection">
-                <h2 style="margin-bottom: 24px;"><i class="fa-regular fa-clipboard"></i> Siparişlerim</h2>
-                ${ordersHtml}
-            </div>
-
-            <div style="display: ${currentSection === 'wishlist' ? 'block' : 'none'}" id="wishlistSection">
-                <h2 style="margin-bottom: 24px;"><i class="fa-regular fa-heart"></i> Beğendiklerim</h2>
-                ${wishlistHtml}
-            </div>
-
-            <div style="display: ${currentSection === 'coupons' ? 'block' : 'none'}" id="couponsSection">
-                <h2 style="margin-bottom: 24px;"><i class="fa-regular fa-ticket"></i> Kuponlarım</h2>
-                ${couponsHtml}
-            </div>
-
-            <div style="display: ${currentSection === 'wallet' ? 'block' : 'none'}" id="walletSection">
-                <div class="wallet-card">
-                    <h3><i class="fa-regular fa-wallet"></i> Cüzdanım</h3>
-                    <p style="margin-top:16px;">Güncel bakiye: <strong>${balance} TL</strong></p>
-                    <button class="btn-wallet" style="margin-top:16px;" onclick="showAddBalanceModal()">Bakiye Yükle</button>
-                    <button class="btn-wallet" style="margin-top:16px; margin-left:12px;" onclick="showWithdrawModal()">Bakiye Çek</button>
                 </div>
             </div>
         `;
@@ -1120,7 +874,7 @@
     }
 
     // ============================================
-    // BÖLÜM DEĞİŞTİRME (DÜZELTİLDİ)
+    // BÖLÜM DEĞİŞTİRME
     // ============================================
     function changeSection(section) {
         currentSection = section;
@@ -1151,18 +905,6 @@
                         <div class="dropdown-items">
                             <div class="dropdown-item" onclick="changeSection('dashboard')">
                                 <i class="fa-regular fa-user"></i> Hesabım
-                            </div>
-                            <div class="dropdown-item" onclick="changeSection('orders')">
-                                <i class="fa-regular fa-clipboard"></i> Siparişlerim
-                            </div>
-                            <div class="dropdown-item" onclick="changeSection('wishlist')">
-                                <i class="fa-regular fa-heart"></i> Beğendiklerim
-                            </div>
-                            <div class="dropdown-item" onclick="changeSection('coupons')">
-                                <i class="fa-regular fa-ticket"></i> Kuponlarım
-                            </div>
-                            <div class="dropdown-item" onclick="changeSection('wallet')">
-                                <i class="fa-regular fa-wallet"></i> Cüzdanım
                             </div>
                             <div class="dropdown-divider"></div>
                             <div class="dropdown-item logout-item" onclick="logout()">
@@ -1217,7 +959,6 @@
     window.changeSection = changeSection;
     window.showAddBalanceModal = showAddBalanceModal;
     window.showWithdrawModal = showWithdrawModal;
-    window.removeFromWishlist = removeFromWishlist;
     window.addBalance = addBalance;
     window.withdrawBalance = withdrawBalance;
     window.handleOAuthApprove = handleOAuthApprove;
