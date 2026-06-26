@@ -51,7 +51,7 @@
             cursor: pointer;
         }
 
-        /* Kullanıcı menüsü (fotodaki gibi) */
+        /* Kullanıcı menüsü */
         .user-menu {
             position: relative;
             cursor: pointer;
@@ -94,7 +94,6 @@
             color: #666;
         }
 
-        /* Dropdown menü (fotodaki gibi) */
         .user-dropdown {
             position: absolute;
             top: 55px;
@@ -166,7 +165,7 @@
             color: #ff3b30;
         }
 
-        /* Butonlar (giriş yapmamışsa) */
+        /* Butonlar */
         .auth-buttons {
             display: flex;
             gap: 12px;
@@ -204,6 +203,179 @@
             padding: 0 5%;
         }
 
+        /* ======================================== */
+        /* ===== ONAY EKRANI (YENİ) ===== */
+        /* ======================================== */
+        .oauth-container {
+            max-width: 480px;
+            margin: 40px auto;
+            padding: 40px 30px;
+            background: white;
+            border-radius: 32px;
+            border: 1px solid #eef2f6;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.06);
+            text-align: center;
+        }
+
+        .oauth-brand {
+            margin-bottom: 30px;
+        }
+
+        .oauth-brand img {
+            height: 48px;
+        }
+
+        .oauth-brand h2 {
+            margin-top: 8px;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+        .oauth-brand h2 span {
+            color: #ff3b30;
+        }
+
+        .oauth-app {
+            background: #f8f9fc;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+        }
+
+        .oauth-app .app-icon {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .oauth-app .app-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .oauth-app .app-desc {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .oauth-permissions {
+            background: #f8f9fc;
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .oauth-permissions .title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .oauth-permissions .item {
+            padding: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #1a1a2e;
+        }
+
+        .oauth-permissions .item::before {
+            content: "✅";
+        }
+
+        .oauth-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f8f9fc;
+            padding: 12px 16px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .oauth-user .avatar {
+            width: 40px;
+            height: 40px;
+            background: #1a1a2e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .oauth-user .info {
+            flex: 1;
+        }
+
+        .oauth-user .info .name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .oauth-user .info .email {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .oauth-user .info .status {
+            font-size: 0.7rem;
+            color: #4caf50;
+        }
+
+        .oauth-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .oauth-actions button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .oauth-actions .btn-allow {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        .oauth-actions .btn-allow:hover {
+            background: #ff3b30;
+            transform: scale(1.02);
+        }
+
+        .oauth-actions .btn-deny {
+            background: #f0f2f5;
+            color: #666;
+        }
+
+        .oauth-actions .btn-deny:hover {
+            background: #e4e6e9;
+        }
+
+        .oauth-footer {
+            margin-top: 20px;
+            font-size: 0.7rem;
+            color: #aaa;
+        }
+
+        .oauth-footer a {
+            color: #1a1a2e;
+            text-decoration: none;
+        }
+
         /* Hoşgeldin kartı */
         .welcome-card {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -222,7 +394,6 @@
             opacity: 0.8;
         }
 
-        /* Grid içerik */
         .content-grid {
             display: none;
         }
@@ -280,7 +451,6 @@
             color: #c62828;
         }
 
-        /* Cüzdan kartı */
         .wallet-card {
             background: white;
             border-radius: 28px;
@@ -311,7 +481,6 @@
             cursor: pointer;
         }
 
-        /* Beğendiklerim */
         .liked-item {
             display: flex;
             justify-content: space-between;
@@ -386,6 +555,31 @@
             color: #888;
             font-size: 0.8rem;
         }
+
+        /* ===== HATA SAYFASI ===== */
+        .oauth-error {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .oauth-error .error-icon {
+            font-size: 60px;
+            display: block;
+            margin-bottom: 20px;
+        }
+        .oauth-error h2 {
+            color: #ff3b30;
+        }
+        .oauth-error .btn-back {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #1a1a2e;
+            color: white;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -434,7 +628,9 @@
 </div>
 
 <script>
-    // ---------- FIREBASE ----------
+    // ============================================
+    // FIREBASE KONFIGÜRASYONU
+    // ============================================
     const firebaseConfig = {
         apiKey: "AIzaSyB0PdRozDzBzSyuuNIRG67xg-W3UJBfJD8",
         authDomain: "bliesports.firebaseapp.com",
@@ -449,7 +645,21 @@
     let currentUser = null;
     let currentSection = 'dashboard';
 
-    // Toast mesajı
+    // ============================================
+    // OAuth PARAMETRELERİ
+    // ============================================
+    const urlParams = new URLSearchParams(window.location.search);
+    const oauthClientId = urlParams.get('client_id');
+    const oauthRedirectUri = urlParams.get('redirect_uri');
+    const oauthState = urlParams.get('state');
+    const isOAuthRequest = oauthClientId && oauthRedirectUri;
+
+    // Geçici kodları saklamak için (gerçekte Firestore'da saklanmalı)
+    const oauthCodes = {};
+
+    // ============================================
+    // TOAST
+    // ============================================
     function showToast(msg) {
         const toast = document.createElement('div');
         toast.className = 'toast';
@@ -458,7 +668,9 @@
         setTimeout(() => toast.remove(), 2500);
     }
 
-    // Modal kontrol
+    // ============================================
+    // MODAL KONTROL
+    // ============================================
     function openAuthModal() {
         document.getElementById('authModal').classList.add('active');
     }
@@ -474,7 +686,9 @@
         document.getElementById('registerFormContent').style.display = 'none';
     };
 
-    // Giriş/Kayıt işlemleri
+    // ============================================
+    // GİRİŞ / KAYIT
+    // ============================================
     async function handleLogin() {
         const email = document.getElementById('loginEmail').value;
         const pass = document.getElementById('loginPassword').value;
@@ -482,7 +696,12 @@
             await auth.signInWithEmailAndPassword(email, pass);
             showToast("Giriş başarılı!");
             closeAuthModal();
-            window.location.reload();
+            // OAuth isteği varsa, girişten sonra onay ekranı gelsin
+            if (isOAuthRequest) {
+                window.location.reload();
+            } else {
+                window.location.reload();
+            }
         } catch(e) {
             showToast("Hata: " + e.message);
         }
@@ -507,30 +726,162 @@
             });
             showToast("Kayıt başarılı! Hoşgeldin.");
             closeAuthModal();
-            window.location.reload();
+            if (isOAuthRequest) {
+                window.location.reload();
+            } else {
+                window.location.reload();
+            }
         } catch(e) {
             showToast("Hata: " + e.message);
         }
     }
 
-    // Çıkış
+    // ============================================
+    // ÇIKIŞ
+    // ============================================
     async function logout() {
         await auth.signOut();
         showToast("Çıkış yapıldı.");
         window.location.reload();
     }
 
-    // ---------- SİPARİŞLER (Demo - Firestore'dan çekilecek) ----------
+    // ============================================
+    // OAuth ONAY İŞLEMİ
+    // ============================================
+    async function handleOAuthApprove() {
+        if (!currentUser) {
+            showToast("Lütfen önce giriş yapın.");
+            return;
+        }
+
+        // Geçici kod oluştur
+        const code = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        oauthCodes[code] = {
+            userId: currentUser.uid,
+            clientId: oauthClientId,
+            createdAt: Date.now()
+        };
+
+        // Kullanıcı bilgilerini al
+        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+        const userData = userDoc.data() || {};
+
+        // Kodu Firestore'a da kaydedelim (güvenlik için)
+        await db.collection('oauth_codes').doc(code).set({
+            userId: currentUser.uid,
+            clientId: oauthClientId,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            used: false
+        });
+
+        // Kullanıcıyı yönlendir
+        const redirectUrl = oauthRedirectUri.includes('?') 
+            ? `${oauthRedirectUri}&code=${code}&state=${oauthState}`
+            : `${oauthRedirectUri}?code=${code}&state=${oauthState}`;
+        
+        window.location.href = redirectUrl;
+    }
+
+    function handleOAuthDeny() {
+        const redirectUrl = oauthRedirectUri.includes('?')
+            ? `${oauthRedirectUri}&error=access_denied&state=${oauthState}`
+            : `${oauthRedirectUri}?error=access_denied&state=${oauthState}`;
+        window.location.href = redirectUrl;
+    }
+
+    // ============================================
+    // OAuth ONAY EKRANINI RENDER ET
+    // ============================================
+    function renderOAuthApproval() {
+        const container = document.getElementById('mainContainer');
+        const userName = currentUser?.displayName || 'Kullanıcı';
+        const userEmail = currentUser?.email || '';
+        const initial = userName.charAt(0).toUpperCase();
+
+        container.innerHTML = `
+            <div class="oauth-container">
+                <div class="oauth-brand">
+                    <img src="ChatGPT Image 4 May 2026 17_50_07.png" alt="BLI">
+                    <h2>BLI <span>ESPORTS</span></h2>
+                </div>
+
+                <div class="oauth-app">
+                    <span class="app-icon">🎮</span>
+                    <div class="app-name">${escapeHtml(oauthClientId)}</div>
+                    <div class="app-desc">uygulaması hesabınıza erişmek istiyor</div>
+                </div>
+
+                <div class="oauth-permissions">
+                    <div class="title">🔓 Bu uygulamaya gönderilecek bilgiler</div>
+                    <div class="item">E-posta adresiniz</div>
+                    <div class="item">Kullanıcı adınız</div>
+                    <div class="item">Profil resminiz</div>
+                </div>
+
+                <div class="oauth-user">
+                    <div class="avatar">${initial}</div>
+                    <div class="info">
+                        <div class="name">${escapeHtml(userName)}</div>
+                        <div class="email">${escapeHtml(userEmail)}</div>
+                        <div class="status">✅ Oturum açık</div>
+                    </div>
+                </div>
+
+                <div class="oauth-actions">
+                    <button class="btn-allow" onclick="handleOAuthApprove()">
+                        ✅ İzin Ver
+                    </button>
+                    <button class="btn-deny" onclick="handleOAuthDeny()">
+                        ❌ Reddet
+                    </button>
+                </div>
+
+                <div class="oauth-footer">
+                    <a href="/privacy">Gizlilik</a> · 
+                    <a href="/terms">Kullanım Şartları</a>
+                </div>
+            </div>
+        `;
+    }
+
+    // ============================================
+    // HATA EKRANI
+    // ============================================
+    function renderOAuthError(message) {
+        const container = document.getElementById('mainContainer');
+        container.innerHTML = `
+            <div class="oauth-error">
+                <span class="error-icon">🚫</span>
+                <h2>Hata</h2>
+                <p style="color:#888;">${escapeHtml(message)}</p>
+                <a href="/" class="btn-back">Ana Sayfaya Dön</a>
+            </div>
+        `;
+    }
+
+    // ============================================
+    // YARDIMCI FONKSİYONLAR
+    // ============================================
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ============================================
+    // SİPARİŞLER (Demo)
+    // ============================================
     async function getOrders() {
-        // Gerçek uygulamada db.collection('orders').where('userId', '==', currentUser.uid).get()
-        // Şimdilik demo veri
         return [
             { id: "BLI-2401", date: "15 Mart 2026", total: 1899, status: "delivered", items: "BLI V1 PRO Mouse" },
             { id: "BLI-2402", date: "28 Şubat 2026", total: 749, status: "shipped", items: "Elite Jersey V2" }
         ];
     }
 
-    // ---------- CÜZDAN (Firestore) ----------
+    // ============================================
+    // CÜZDAN
+    // ============================================
     async function getBalance() {
         if(!currentUser) return 0;
         const doc = await db.collection('users').doc(currentUser.uid).get();
@@ -558,20 +909,14 @@
         renderMainContent();
     }
 
-    // ---------- BEĞENDİKLERİM (Wishlist - Firestore) ----------
+    // ============================================
+    // BEĞENDİKLERİM
+    // ============================================
     async function getWishlist() {
         if(!currentUser) return [];
         const doc = await db.collection('users').doc(currentUser.uid).get();
         if(doc.exists) return doc.data().wishlist || [];
         return [];
-    }
-
-    async function addToWishlist(product) {
-        const wishlist = await getWishlist();
-        wishlist.push(product);
-        await db.collection('users').doc(currentUser.uid).update({ wishlist: wishlist });
-        showToast("Ürün beğenilere eklendi!");
-        renderMainContent();
     }
 
     async function removeFromWishlist(index) {
@@ -582,16 +927,43 @@
         renderMainContent();
     }
 
-    // ---------- KUPONLARIM ----------
+    // ============================================
+    // KUPONLAR
+    // ============================================
     async function getCoupons() {
+        if(!currentUser) return [];
         const doc = await db.collection('users').doc(currentUser.uid).get();
         if(doc.exists) return doc.data().coupons || [];
         return [];
     }
 
-    // ---------- ANA İÇERİK RENDER ----------
+    // ============================================
+    // ANA İÇERİK RENDER
+    // ============================================
     async function renderMainContent() {
         const container = document.getElementById('mainContainer');
+        
+        // OAuth isteği varsa ve kullanıcı giriş yapmışsa onay ekranını göster
+        if (isOAuthRequest && currentUser) {
+            renderOAuthApproval();
+            return;
+        }
+
+        // OAuth isteği varsa ama kullanıcı giriş yapmamışsa login göster
+        if (isOAuthRequest && !currentUser) {
+            container.innerHTML = `
+                <div class="welcome-card">
+                    <h1>🔐 Giriş Yap</h1>
+                    <p>"${escapeHtml(oauthClientId)}" uygulamasına izin vermek için önce giriş yapmalısın.</p>
+                </div>
+                <div style="text-align: center; padding: 40px;">
+                    <button class="btn-login" onclick="openAuthModal()">Giriş Yap / Kaydol</button>
+                </div>
+            `;
+            return;
+        }
+
+        // Normal dashboard
         if(!currentUser) {
             container.innerHTML = `
                 <div class="welcome-card">
@@ -707,7 +1079,9 @@
         `;
     }
 
-    // Bakiye yükleme/çekme modal
+    // ============================================
+    // BAKİYE İŞLEMLERİ
+    // ============================================
     function showAddBalanceModal() {
         const amount = prompt("Yüklenecek tutar (TL):");
         if(amount && !isNaN(amount) && Number(amount) > 0) {
@@ -725,23 +1099,28 @@
         }
     }
 
-    // Dropdown menüden bölüm değiştirme
+    // ============================================
+    // BÖLÜM DEĞİŞTİRME
+    // ============================================
     function changeSection(section) {
         if (section === 'dashboard') {
-            window.location.href = '/my-account/index.html';
+            currentSection = 'dashboard';
         } else if (section === 'orders') {
-            window.location.href = '/my-orders/index.html';
+            currentSection = 'orders';
         } else if (section === 'wishlist') {
-            window.location.href = '/my-likes/index.html';
+            currentSection = 'wishlist';
         } else if (section === 'coupons') {
-            window.location.href = '/my-coupons/index.html';
+            currentSection = 'coupons';
         } else if (section === 'wallet') {
-            window.location.href = '/my-wallet/index.html';
+            currentSection = 'wallet';
         }
         document.querySelector('.user-menu')?.classList.remove('active');
+        renderMainContent();
     }
 
-    // Navbar sağ taraf render (giriş yapmışsa user-menu, değilse butonlar)
+    // ============================================
+    // NAVBAR RENDER
+    // ============================================
     function renderNavbar() {
         const navRight = document.getElementById('navRightArea');
         if(currentUser) {
@@ -793,12 +1172,14 @@
         }
     }
 
+    // ============================================
+    // DROPDOWN KONTROL
+    // ============================================
     function toggleUserMenu() {
         const menu = document.getElementById('userMenu');
         if(menu) menu.classList.toggle('active');
     }
 
-    // Sayfaya tıklayınca dropdown kapanması
     document.addEventListener('click', function(e) {
         const userMenu = document.getElementById('userMenu');
         if(userMenu && !userMenu.contains(e.target)) {
@@ -806,14 +1187,18 @@
         }
     });
 
-    // Auth state değiştiğinde
+    // ============================================
+    // AUTH STATE DEĞİŞİKLİĞİ
+    // ============================================
     auth.onAuthStateChanged(async (user) => {
         currentUser = user;
         renderNavbar();
         await renderMainContent();
     });
 
-    // Global fonksiyonlar
+    // ============================================
+    // GLOBAL FONKSİYONLAR
+    // ============================================
     window.handleLogin = handleLogin;
     window.handleRegister = handleRegister;
     window.logout = logout;
@@ -825,6 +1210,8 @@
     window.removeFromWishlist = removeFromWishlist;
     window.addBalance = addBalance;
     window.withdrawBalance = withdrawBalance;
+    window.handleOAuthApprove = handleOAuthApprove;
+    window.handleOAuthDeny = handleOAuthDeny;
 </script>
 </body>
-        </html>
+                </html>
