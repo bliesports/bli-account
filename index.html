@@ -1,1 +1,914 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLI ACCOUNT</title>
 
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <link rel="icon" type="image/png" href="ChatGPT Image 4 May 2026 17_50_07.png">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8f9fc;
+            color: #1a1a2e;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #eef2f6;
+            padding: 14px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+        }
+
+        .logo img {
+            height: 48px;
+            cursor: pointer;
+        }
+
+        .user-menu {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .user-trigger {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f0f2f5;
+            padding: 8px 16px 8px 12px;
+            border-radius: 50px;
+            transition: 0.2s;
+        }
+
+        .user-trigger:hover {
+            background: #e4e6e9;
+        }
+
+        .user-avatar {
+            width: 38px;
+            height: 38px;
+            background: #1a1a2e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-chevron {
+            font-size: 0.7rem;
+            color: #666;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            width: 320px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            border: 1px solid #eef2f6;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.2s;
+            z-index: 1001;
+        }
+
+        .user-menu.active .user-dropdown {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .dropdown-header {
+            padding: 20px 20px 12px;
+            border-bottom: 1px solid #eef2f6;
+        }
+
+        .dropdown-header h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .dropdown-header p {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .dropdown-items {
+            padding: 8px 0;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .dropdown-item:hover {
+            background: #f8f9fc;
+        }
+
+        .dropdown-item i {
+            width: 22px;
+            color: #ff3b30;
+            font-size: 1rem;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #eef2f6;
+            margin: 8px 0;
+        }
+
+        .logout-item {
+            color: #ff3b30;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-login {
+            background: #1a1a2e;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-login:hover {
+            background: #ff3b30;
+        }
+
+        .btn-register {
+            background: transparent;
+            border: 1px solid #ddd;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .main-container {
+            max-width: 1280px;
+            margin: 100px auto 60px;
+            padding: 0 5%;
+        }
+
+        /* ONAY EKRANI */
+        .oauth-container {
+            max-width: 480px;
+            margin: 40px auto;
+            padding: 40px 30px;
+            background: white;
+            border-radius: 32px;
+            border: 1px solid #eef2f6;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.06);
+            text-align: center;
+        }
+
+        .oauth-brand {
+            margin-bottom: 30px;
+        }
+
+        .oauth-brand img {
+            height: 48px;
+        }
+
+        .oauth-brand h2 {
+            margin-top: 8px;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+        .oauth-brand h2 span {
+            color: #ff3b30;
+        }
+
+        .oauth-app {
+            background: #f8f9fc;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+        }
+
+        .oauth-app .app-icon {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .oauth-app .app-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .oauth-app .app-desc {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .oauth-permissions {
+            background: #f8f9fc;
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .oauth-permissions .title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .oauth-permissions .item {
+            padding: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #1a1a2e;
+        }
+
+        .oauth-permissions .item::before {
+            content: "✅";
+        }
+
+        .oauth-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f8f9fc;
+            padding: 12px 16px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .oauth-user .avatar {
+            width: 40px;
+            height: 40px;
+            background: #1a1a2e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .oauth-user .info {
+            flex: 1;
+        }
+
+        .oauth-user .info .name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .oauth-user .info .email {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .oauth-user .info .status {
+            font-size: 0.7rem;
+            color: #4caf50;
+        }
+
+        .oauth-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .oauth-actions button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .oauth-actions .btn-allow {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        .oauth-actions .btn-allow:hover {
+            background: #ff3b30;
+            transform: scale(1.02);
+        }
+
+        .oauth-actions .btn-deny {
+            background: #f0f2f5;
+            color: #666;
+        }
+
+        .oauth-actions .btn-deny:hover {
+            background: #e4e6e9;
+        }
+
+        .oauth-footer {
+            margin-top: 20px;
+            font-size: 0.7rem;
+            color: #aaa;
+        }
+
+        .oauth-footer a {
+            color: #1a1a2e;
+            text-decoration: none;
+        }
+
+        .welcome-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 32px;
+            padding: 40px;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .welcome-card h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .welcome-card p {
+            opacity: 0.8;
+        }
+
+        .wallet-card {
+            background: white;
+            border-radius: 28px;
+            padding: 28px;
+            border: 1px solid #eef2f6;
+            margin-bottom: 24px;
+        }
+
+        .wallet-amount {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 16px 0;
+        }
+
+        .balance-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-wallet {
+            background: #1a1a2e;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 32px;
+            padding: 32px;
+            width: 90%;
+            max-width: 450px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 16px;
+            margin: 12px 0;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1a1a2e;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 60px;
+            font-weight: 500;
+            z-index: 3000;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid #eef2f6;
+            margin-top: 60px;
+            color: #888;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo" onclick="location.href='/'">
+            <img src="ChatGPT Image 4 May 2026 17_50_07.png" alt="BLI">
+        </div>
+        <div id="navRightArea"></div>
+    </nav>
+
+    <div class="main-container" id="mainContainer"></div>
+
+    <footer>
+        <p>© 2026 BLI ESPORTS — Tüm hakları saklıdır.</p>
+    </footer>
+
+    <!-- Modal -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <div id="loginFormContent">
+                <h3 style="margin-bottom: 20px;">Giriş Yap</h3>
+                <input type="email" id="loginEmail" placeholder="E-posta">
+                <input type="password" id="loginPassword" placeholder="Şifre">
+                <button class="btn-login" style="width:100%; margin-top:12px;" onclick="handleLogin()">Giriş Yap</button>
+                <p style="margin-top: 20px; text-align:center;">
+                    Hesabın yok mu? <a href="#" onclick="switchToRegister()" style="color:#ff3b30;">Kaydol</a>
+                </p>
+            </div>
+            <div id="registerFormContent" style="display:none;">
+                <h3 style="margin-bottom: 20px;">Kaydol</h3>
+                <input type="text" id="regName" placeholder="Ad Soyad">
+                <input type="email" id="regEmail" placeholder="E-posta">
+                <input type="password" id="regPassword" placeholder="Şifre">
+                <button class="btn-login" style="width:100%; margin-top:12px;" onclick="handleRegister()">Kaydol</button>
+                <p style="margin-top: 20px; text-align:center;">
+                    Zaten hesabın var mı? <a href="#" onclick="switchToLogin()" style="color:#ff3b30;">Giriş Yap</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // FIREBASE
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0PdRozDzBzSyuuNIRG67xg-W3UJBfJD8",
+            authDomain: "bliesports.firebaseapp.com",
+            projectId: "bliesports",
+            storageBucket: "bliesports.firebasestorage.app",
+            appId: "1:880767104142:web:5edbe111f42f16ab1545df"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+
+        // ============================================
+        // URL PARAMETRELERİ
+        // ============================================
+        const params = new URLSearchParams(window.location.search);
+        const CLIENT_ID = params.get('client_id');
+        const REDIRECT_URI = params.get('redirect_uri');
+        const STATE = params.get('state');
+        const IS_OAUTH = CLIENT_ID && REDIRECT_URI;
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(msg) {
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.innerText = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2500);
+        }
+
+        // ============================================
+        // MODAL
+        // ============================================
+        function openModal() {
+            document.getElementById('authModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('authModal').classList.remove('active');
+        }
+
+        window.switchToRegister = function() {
+            document.getElementById('loginFormContent').style.display = 'none';
+            document.getElementById('registerFormContent').style.display = 'block';
+        };
+
+        window.switchToLogin = function() {
+            document.getElementById('loginFormContent').style.display = 'block';
+            document.getElementById('registerFormContent').style.display = 'none';
+        };
+
+        // ============================================
+        // GİRİŞ / KAYIT
+        // ============================================
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPassword').value;
+            try {
+                await auth.signInWithEmailAndPassword(email, pass);
+                showToast('Giriş başarılı!');
+                closeModal();
+                window.location.reload();
+            } catch (e) {
+                showToast('Hata: ' + e.message);
+            }
+        }
+
+        async function handleRegister() {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const pass = document.getElementById('regPassword').value;
+            if (!name || !email || !pass) {
+                showToast('Tüm alanları doldur!');
+                return;
+            }
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, pass);
+                await cred.user.updateProfile({ displayName: name });
+                await db.collection('users').doc(cred.user.uid).set({
+                    name: name,
+                    email: email,
+                    balance: 0,
+                    createdAt: new Date()
+                });
+                showToast('Kayıt başarılı!');
+                closeModal();
+                window.location.reload();
+            } catch (e) {
+                showToast('Hata: ' + e.message);
+            }
+        }
+
+        // ============================================
+        // ÇIKIŞ
+        // ============================================
+        async function logout() {
+            await auth.signOut();
+            showToast('Çıkış yapıldı.');
+            window.location.href = '/';
+        }
+
+        // ============================================
+        // **** İZİN VER - KULLANICI ADI GÖNDER ****
+        // ============================================
+        async function allowAccess() {
+            if (!currentUser) {
+                showToast('Lütfen giriş yapın.');
+                return;
+            }
+
+            // Kullanıcı adını al
+            const userName = currentUser.displayName || currentUser.email?.split('@')[0] || 'Kullanıcı';
+
+            // Kod oluştur
+            const code = 'BLI_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+
+            try {
+                // Firestore'a kaydet (içine kullanıcı adını da ekle)
+                await db.collection('oauth_codes').doc(code).set({
+                    userId: currentUser.uid,
+                    clientId: CLIENT_ID,
+                    userName: userName,  // 🔥 BURASI ÖNEMLİ
+                    userEmail: currentUser.email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    used: false
+                });
+
+                // Yönlendirme URL'si
+                let targetUrl = REDIRECT_URI;
+                if (targetUrl.includes('?')) {
+                    targetUrl += '&code=' + encodeURIComponent(code);
+                } else {
+                    targetUrl += '?code=' + encodeURIComponent(code);
+                }
+                if (STATE) {
+                    targetUrl += '&state=' + encodeURIComponent(STATE);
+                }
+
+                console.log('✅ YÖNLENDİRİLİYOR:', targetUrl);
+                window.location.href = targetUrl;
+
+            } catch (error) {
+                console.error('❌ HATA:', error);
+                showToast('Hata: ' + error.message);
+            }
+        }
+
+        // ============================================
+        // REDDET
+        // ============================================
+        function denyAccess() {
+            let targetUrl = REDIRECT_URI;
+            if (targetUrl.includes('?')) {
+                targetUrl += '&error=access_denied';
+            } else {
+                targetUrl += '?error=access_denied';
+            }
+            if (STATE) {
+                targetUrl += '&state=' + encodeURIComponent(STATE);
+            }
+            window.location.href = targetUrl;
+        }
+
+        // ============================================
+        // ONAY EKRANI
+        // ============================================
+        function renderOAuth() {
+            const container = document.getElementById('mainContainer');
+            const name = currentUser?.displayName || 'Kullanıcı';
+            const email = currentUser?.email || '';
+            const initial = name.charAt(0).toUpperCase();
+
+            container.innerHTML = `
+                <div class="oauth-container">
+                    <div class="oauth-brand">
+                        <img src="ChatGPT Image 4 May 2026 17_50_07.png" alt="BLI">
+                        <h2>BLI <span>ESPORTS</span></h2>
+                    </div>
+                    <div class="oauth-app">
+                        <span class="app-icon">🎮</span>
+                        <div class="app-name">${CLIENT_ID}</div>
+                        <div class="app-desc">hesabınıza erişmek istiyor</div>
+                    </div>
+                    <div class="oauth-permissions">
+                        <div class="title">🔓 Gönderilecek bilgiler</div>
+                        <div class="item">E-posta adresiniz</div>
+                        <div class="item">Kullanıcı adınız</div>
+                    </div>
+                    <div class="oauth-user">
+                        <div class="avatar">${initial}</div>
+                        <div class="info">
+                            <div class="name">${name}</div>
+                            <div class="email">${email}</div>
+                            <div class="status">✅ Oturum açık</div>
+                        </div>
+                    </div>
+                    <div class="oauth-actions">
+                        <button class="btn-allow" onclick="allowAccess()">✅ İzin Ver</button>
+                        <button class="btn-deny" onclick="denyAccess()">❌ Reddet</button>
+                    </div>
+                    <div class="oauth-footer">
+                        <a href="#">Gizlilik</a> · <a href="#">Kullanım Şartları</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // CÜZDAN
+        // ============================================
+        async function getBalance() {
+            if (!currentUser) return 0;
+            try {
+                const doc = await db.collection('users').doc(currentUser.uid).get();
+                return doc.exists ? doc.data().balance || 0 : 0;
+            } catch {
+                return 0;
+            }
+        }
+
+        async function addBalance(amount) {
+            const current = await getBalance();
+            await db.collection('users').doc(currentUser.uid).update({ balance: current + amount });
+            showToast(amount + ' TL eklendi!');
+            renderMain();
+        }
+
+        async function withdrawBalance(amount) {
+            const current = await getBalance();
+            if (current < amount) {
+                showToast('Yetersiz bakiye!');
+                return;
+            }
+            await db.collection('users').doc(currentUser.uid).update({ balance: current - amount });
+            showToast(amount + ' TL çekildi.');
+            renderMain();
+        }
+
+        // ============================================
+        // ANA SAYFA
+        // ============================================
+        async function renderMain() {
+            const container = document.getElementById('mainContainer');
+
+            if (IS_OAUTH && currentUser) {
+                renderOAuth();
+                return;
+            }
+
+            if (IS_OAUTH && !currentUser) {
+                container.innerHTML = `
+                    <div class="welcome-card">
+                        <h1>🔐 Giriş Yap</h1>
+                        <p>"${CLIENT_ID}" uygulamasına izin vermek için giriş yap.</p>
+                    </div>
+                    <div style="text-align:center; padding:40px;">
+                        <button class="btn-login" onclick="openModal()">Giriş Yap / Kaydol</button>
+                    </div>
+                `;
+                return;
+            }
+
+            if (!currentUser) {
+                container.innerHTML = `
+                    <div class="welcome-card">
+                        <h1>BLI Hesabına Hoşgeldin</h1>
+                        <p>Giriş yaparak hesabını yönet.</p>
+                    </div>
+                    <div style="text-align:center; padding:60px;">
+                        <button class="btn-login" onclick="openModal()">Giriş Yap / Kaydol</button>
+                    </div>
+                `;
+                return;
+            }
+
+            const balance = await getBalance();
+            container.innerHTML = `
+                <div class="welcome-card">
+                    <h1>Merhaba, ${currentUser.displayName?.split(' ')[0] || 'Kullanıcı'} 👋</h1>
+                    <p>Hesabını yönet.</p>
+                </div>
+                <div class="wallet-card">
+                    <h3><i class="fa-regular fa-credit-card"></i> Cüzdanım</h3>
+                    <div class="wallet-amount">${balance} TL</div>
+                    <div class="balance-actions">
+                        <button class="btn-wallet" onclick="showAdd()">Bakiye Yükle</button>
+                        <button class="btn-wallet" onclick="showWithdraw()">Bakiye Çek</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showAdd() {
+            const amount = prompt('Yüklenecek tutar:');
+            if (amount && !isNaN(amount) && Number(amount) > 0) {
+                addBalance(Number(amount));
+            }
+        }
+
+        function showWithdraw() {
+            const amount = prompt('Çekilecek tutar:');
+            if (amount && !isNaN(amount) && Number(amount) > 0) {
+                withdrawBalance(Number(amount));
+            }
+        }
+
+        // ============================================
+        // NAVBAR
+        // ============================================
+        function renderNavbar() {
+            const area = document.getElementById('navRightArea');
+            if (currentUser) {
+                const name = currentUser.displayName || currentUser.email?.split('@')[0] || 'Kullanıcı';
+                const initial = name.charAt(0).toUpperCase();
+                area.innerHTML = `
+                    <div class="user-menu" id="userMenu">
+                        <div class="user-trigger" onclick="toggleMenu()">
+                            <div class="user-avatar">${initial}</div>
+                            <span class="user-name">${name}</span>
+                            <i class="fa-solid fa-chevron-down user-chevron"></i>
+                        </div>
+                        <div class="user-dropdown">
+                            <div class="dropdown-header">
+                                <h4>${name}</h4>
+                                <p>${currentUser.email}</p>
+                            </div>
+                            <div class="dropdown-items">
+                                <div class="dropdown-item" onclick="location.reload()">
+                                    <i class="fa-regular fa-user"></i> Hesabım
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <div class="dropdown-item logout-item" onclick="logout()">
+                                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Çıkış Yap
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                area.innerHTML = `
+                    <div class="auth-buttons">
+                        <button class="btn-login" onclick="openModal()">Giriş Yap</button>
+                        <button class="btn-register" onclick="openModal()">Kaydol</button>
+                    </div>
+                `;
+            }
+        }
+
+        function toggleMenu() {
+            document.getElementById('userMenu')?.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            if (menu && !menu.contains(e.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // ============================================
+        // AUTH STATE
+        // ============================================
+        auth.onAuthStateChanged(async (user) => {
+            currentUser = user;
+            renderNavbar();
+            await renderMain();
+        });
+
+        // ============================================
+        // GLOBAL
+        // ============================================
+        window.handleLogin = handleLogin;
+        window.handleRegister = handleRegister;
+        window.logout = logout;
+        window.openModal = openModal;
+        window.allowAccess = allowAccess;
+        window.denyAccess = denyAccess;
+        window.showAdd = showAdd;
+        window.showWithdraw = showWithdraw;
+    </script>
+
+</body>
+  </html>
